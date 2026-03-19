@@ -5,7 +5,7 @@ def extract_syllabus_text(pdf_path,start_page,end_page):
     """
     Extracts and returns all text from a given PDF file.
     """
-    print(f"Processing: {pdf_path}...\n")
+    print(f"Processing: {pdf_path},page{start_page}-{end_page}...\n")
     full_text = ""
     
     # Safely open the PDF
@@ -71,18 +71,19 @@ def parse_syllabus_chapters(pdf_path, sub=False):
                             # if there's no need for sub-chapters, skip this chapter
                             if not sub:
                                 continue
-                            # if we want to find sub-chapters, add page number range to the chapter dictionary
-                            current_numbers=re.findall(r'\d+', item.group(0))
-                            page_number=current_numbers[-1] if current_numbers else None
+                            # if we want to find sub-chapters, add page number range to the chapter dictionary                            
                             lines = page_text.split('\n')
                             current_line_idx = page_text[:item.start()].count('\n')
+                            current_line=lines[current_line_idx]
+                            current_numbers=re.findall(r'\d+', current_line)
+                            current_last=current_numbers[-1] if current_numbers else None
                             next_last = None
                             if current_line_idx + 1 < len(lines):
                                 next_line = lines[current_line_idx + 1]
                                 next_numbers = re.findall(r'\d+', next_line)
                                 next_last = next_numbers[-1] if next_numbers else None
-                            if page_number and next_last:
-                                chapters[item.group(2)].append(page_number)
+                            if current_last and next_last:
+                                chapters[item.group(2)].append(current_last)
                                 chapters[item.group(2)].append(next_last)
                     else:
                         print(f"Warning: No chapter found on page {i + 1}.")
@@ -92,54 +93,12 @@ def parse_syllabus_chapters(pdf_path, sub=False):
     if not sub:
         return chapters           
     # Split the raw text into a list of chunks based on the pattern
-    raw_chapters = chapters
-    for chapter in raw_chapters:
-        raw_text=extract_syllabus_text(pdf_path,int(raw_chapters[chapter][1]),int(raw_chapters[chapter][2]))
-        raw_chapters[chapter] = split_into_subchapters(raw_text)
-    structured_syllabus = {}
-    
-    for chunk in raw_chapters:
-        chunk = chunk.strip()
-        if not chunk:
-            continue
+    structured_chapters = chapters
+    for chapter in structured_chapters:
+        raw_text=extract_syllabus_text(pdf_path,int(structured_chapters[chapter][1]),int(structured_chapters[chapter][2]))
+        structured_chapters[chapter] =extract_guideline_paragraphs(raw_text)
             
-        # Extract the title (the first line) and the body (everything else)
-        lines = chunk.split('\n', 1)
-        if len(lines) == 2:
-            title = lines[0].strip()
-            content = lines[1].strip()
-            structured_syllabus[title] = content
-            
-    return structured_syllabus
-
-def split_into_subchapters(chapter_text):
-    """
-    Takes the full text of a chapter and splits it into sub-chapters 
-    based on the 'Px.y' pattern.
-    """
-    # Lookahead regex: splits the text right before 'P' followed by numbers, dot, numbers.
-    # E.g., it matches the invisible space before "P1.1", "P12.4", etc.
-    subchapter_pattern = r'(?=P\d+\.\d+)'
-    
-    # Split the massive chapter string into chunks
-    chunks = re.split(subchapter_pattern, chapter_text)
-    
-    subchapters = {}
-    
-    for chunk in chunks:
-        chunk = chunk.strip()
-        if not chunk:
-            continue
-            
-        # Separate the "Px.y" heading from the rest of the body text
-        match = re.match(r'(P\d+\.\d+)(.*)', chunk, re.DOTALL)
-        
-        if match:
-            heading = match.group(1).strip()
-            body = match.group(2).strip()
-            subchapters[heading] = body
-            
-    return subchapters
+    return structured_chapters
 
 
 def is_color_black(color_value):
@@ -175,7 +134,7 @@ def extract_subchapters_from_black_frames(pdf_path, start_page_idx, end_page_idx
         # Loop through the specific chapter pages
         for i in range(start_page_idx, end_page_idx):
             page = pdf.pages[i]
-            
+            page_count=0
             if page.rects:
                 for rect in page.rects:
                     # Get the border color and fill color
@@ -196,20 +155,49 @@ def extract_subchapters_from_black_frames(pdf_path, start_page_idx, end_page_idx
                             clean_text = frame_text.strip()
                             subchapters.append(clean_text)
                             print(f"Found black frame with text: {clean_text}")
-                            
+                        else:
+                            print("Fail to extract text from black boxes") 
+            else:
+                page_count+=1
+            print(f"{page_count} pages have no rectangles among {start_page_idx}-{end_page_idx} pages")   
     return subchapters
-# Example Usage:
-dummy_raw_text = """
-Introduction stuff here...
-Chapter 1: Kinematics
-This chapter covers velocity, acceleration, and graphs.
-Chapter 2: Forces
-This chapter covers Newton's laws and friction.
-"""
 
-chapters = parse_syllabus_chapters(dummy_raw_text)
-for title in chapters.keys():
-    print(f"Found: {title}")
+import re
+
+def extract_guideline_paragraphs(chapter_text):
+    """
+    Extracts the Sub-chapter ID, Title, and the list of objectives from the syllabus.
+    """
+    # Regex Breakdown:
+    # 1. (P\d+\.\d+)       -> Captures the ID (e.g., "P1.1")
+    # 2. \s+               -> Handles any newlines or spaces after the ID
+    # 3. ([^\n]+?:)        -> Captures the Title line ending with a colon (e.g., "Electrostatics:")
+    # 4. \s+               -> Handles the newline after the title
+    # 5. (a\.\s[\s\S]+?)   -> Captures the start of the list ("a. ") and everything after it lazily
+    # 6. (?=\n\n|\n[A-Z][a-z]|\Z) -> The Stopping Condition: Stops matching when it sees a 
+    #                         double-newline, a new body paragraph starting with a Capital letter, 
+    #                         or the end of the document.
+    
+    pattern = r'(P\d+\.\d+)\s+([^\n]+?:)\s+(a\.\s[\s\S]+?)(?=\n\n|\n[A-Z][a-z]|\Z)'
+    
+    # We use re.finditer to find all instances of this pattern in the text
+    matches = re.finditer(pattern, chapter_text)
+    
+    structured_subchapters = []
+    
+    for match in matches:
+        sub_id = match.group(1).strip()
+        title = match.group(2).strip()
+        objectives = match.group(3).strip()
+        
+        structured_subchapters.append({
+            "id": sub_id,
+            "title": title,
+            "objectives": objectives
+        })
+        
+    return structured_subchapters
+
 # ==========================================
 # Example Usage
 # ==========================================
@@ -218,7 +206,7 @@ if __name__ == "__main__":
     pdf_file_path = "ExperiData/ESAT_Guide_Physics_June2025.pdf" 
     
     try:
-        extracted_data = extract_syllabus_text(pdf_file_path)
+        extracted_data = extract_syllabus_text(pdf_file_path,0,5)
         
         # Print the first 1000 characters just to verify it worked
         print("Extraction Successful! Here is a preview:\n")
@@ -226,3 +214,11 @@ if __name__ == "__main__":
         
     except FileNotFoundError:
         print(f"Error: Could not find the file at {pdf_file_path}. Please check the path.")
+    
+    try:
+        extracted_chapters=parse_syllabus_chapters(pdf_file_path, sub=True)
+        print("Successfully extract all chapters!")
+        print(extracted_chapters)
+    except:
+        print("Fail to extract all chapters")
+    
