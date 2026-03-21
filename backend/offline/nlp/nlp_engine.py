@@ -1,48 +1,54 @@
 from sentence_transformers import SentenceTransformer, util
+import json
 
-def match_question_to_chapter(question, chapters):
-    """
-    Takes a single question and a list of chapters, returning the best match.
-    """
-    # 1. Load a pre-trained, lightweight NLP model
-    # 'all-MiniLM-L6-v2' is fast and great for general semantic similarity
+def match_question_to_chapter(question_file_path, chapters_file_path):
     print("Loading AI model (this takes a moment the first time)...")
     model = SentenceTransformer('all-MiniLM-L6-v2')
     
-    # 2. Convert text into vector embeddings
-    question_embedding = model.encode(question)
-    chapter_embeddings = model.encode(chapters)
+    # 1. Load the JSON files
+    with open(question_file_path, 'r', encoding='utf-8') as f:
+        questions = json.load(f)
+    with open(chapters_file_path, 'r', encoding='utf-8') as f:
+        chapters = json.load(f)
     
-    # 3. Calculate "Cosine Similarity" (how close the vectors are to each other)
-    # This returns a score between 0 (completely unrelated) and 1 (exact match)
-    similarity_scores = util.cos_sim(question_embedding, chapter_embeddings)[0]
+    # Initialize the output dictionary
+    matched_list = {chapter["id"]: [] for chapter in chapters}
     
-    # 4. Find the chapter with the highest score
-    best_match_index = similarity_scores.argmax().item()
-    best_score = similarity_scores[best_match_index].item()
-    best_chapter = chapters[best_match_index]
+    # 2. Extract and format pure text for the AI
+    chapter_texts = []
+    for chapter in chapters:
+        # Combine the title and the objectives into one rich string
+        text = f"{chapter['title']}. {chapter['objectives']}"
+        chapter_texts.append(text)
+        
+    question_texts = []
+    for question in questions:
+        # Combine the question text, options, and the image description!
+        opts = " ".join(question.get("options", []))
+        img_desc = question.get("image_description", "")
+        text = f"{question['text']} {opts} {img_desc}"
+        question_texts.append(text)
+        
+    # 3. Batch encode everything at once (MUCH faster)
+    print("Generating vector embeddings...")
+    chapter_embeddings = model.encode(chapter_texts, convert_to_tensor=True)
+    question_embeddings = model.encode(question_texts, convert_to_tensor=True)
     
-    return best_chapter, best_score
-
-# ==========================================
-# Example Usage
-# ==========================================
-if __name__ == "__main__":
-    # Simulated data from your extracted syllabus
-    syllabus_chapters = [
-        "Chapter 1: Cellular Biology and Mitosis",
-        "Chapter 2: Kinematics, Velocity, and Acceleration",
-        "Chapter 3: Macroeconomics and Supply Chain",
-        "Chapter 4: Organic Chemistry and Hydrocarbons"
-    ]
-    
-    # A simulated question sliced from a past paper
-    # Notice it doesn't use the words "Kinematics", "Velocity", or "Acceleration"
-    past_paper_question = "If a car drops off a cliff and falls for 4 seconds, how fast is it traveling right before impact?"
-    
-    print(f"Question: '{past_paper_question}'\n")
-    
-    best_chapter, score = match_question_to_chapter(past_paper_question, syllabus_chapters)
-    
-    print(f"Best Match: {best_chapter}")
-    print(f"Confidence Score: {score:.4f} (Out of 1.0)")
+    # 4. Calculate similarities and assign
+    print("Matching questions to chapters...")
+    for i, question in enumerate(questions):
+        # Compare THIS question's embedding to ALL chapter embeddings
+        similarity_scores = util.cos_sim(question_embeddings[i], chapter_embeddings)[0]
+        
+        # Find the highest score
+        best_match_index = similarity_scores.argmax().item()
+        best_score = similarity_scores[best_match_index].item()
+        best_chapter = chapters[best_match_index]
+        
+        # Optional: You can attach the score to the question so you know how confident the AI was!
+        question["confidence_score"] = round(best_score, 3)
+        question["matched_topic"] = best_chapter["title"]
+        
+        matched_list[best_chapter["id"]].append(question)
+        
+    return matched_list
