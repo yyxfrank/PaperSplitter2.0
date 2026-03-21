@@ -32,34 +32,51 @@ def is_valid_question_label(text, question_num):
 
 def find_question_with_advanced_regex(page, question_num):
     """
-    Find question number using advanced regex.
-    
-    Anti-false-positive mechanisms:
-    1. Numbers must be surrounded by whitespace or at line start/end
-    2. Must be followed by period or parenthesis
-    3. Must be on the left side of page (x0 < 100)
-    4. Cannot be part of a word (e.g., "Question1")
+    Find question number using advanced regex AND exact word coordinates.
     """
-    # Get all text blocks on the page
     blocks = page.get_text("blocks")
+    q_str = str(question_num)
     
     for block in blocks:
         if len(block) < 5:
             continue
-        x0, y0, x1, y1, text = block[:5]
+        bx0, by0, bx1, by1, text = block[:5]
         
-        # Filter: only process text blocks on the left side (questions usually on left)
-        if x0 > 100:
+        # 1. Filter: Left side of page only
+        if bx0 > 100:
             continue
-        
-        # 2. NEW: Ignore Headers and Footers (Stops it from reading page numbers!)
-        if y0 < 25 or y0 > (page.rect.height - 25):
+            
+        # 2. Filter: Ignore Headers/Footers
+        if by0 < 25 or by0 > (page.rect.height - 25):
             continue
 
-        # Validate if it's a valid question label
-        if is_valid_question_label(text, question_num):
-            return (x0, y0, x1, y1)
-    
+        # 3. Validate context using our advanced regex
+        if is_valid_question_label(text, q_str):
+            
+            # ---------------------------------------------------------
+            # THE FIX: We found the valid block! Now find the EXACT word 
+            # inside this block to prevent cutting off previous options.
+            # ---------------------------------------------------------
+            block_rect = fitz.Rect(bx0, by0, bx1, by1)
+            words = page.get_text("words", clip=block_rect)
+            
+            for w in words:
+                wx0, wy0, wx1, wy1, wtext = w[:5]
+                
+                # The actual number must also be on the left margin
+                if wx0 > 100: 
+                    continue
+                
+                # Clean the word (strip trailing periods or parentheses)
+                clean_wtext = re.sub(r'[\.\)]$', '', wtext.strip())
+                
+                # If we found the exact number, return ITS precise coordinates
+                if clean_wtext == q_str:
+                    return (wx0, wy0, wx1, wy1)
+            
+            # Fallback just in case the exact word wasn't found
+            return (bx0, by0, bx1, by1)
+            
     return None
 
 def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
