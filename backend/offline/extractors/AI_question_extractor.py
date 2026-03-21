@@ -51,8 +51,11 @@ def find_question_with_advanced_regex(page, question_num):
         # Filter: only process text blocks on the left side (questions usually on left)
         if x0 > 100:
             continue
-        if not re.search(r"\n\s*1\s", text):
+        
+        # 2. NEW: Ignore Headers and Footers (Stops it from reading page numbers!)
+        if y0 < 25 or y0 > (page.rect.height - 25):
             continue
+
         # Validate if it's a valid question label
         if is_valid_question_label(text, question_num):
             return (x0, y0, x1, y1)
@@ -76,8 +79,8 @@ def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
         print(f"📁 Created output folder: {output_folder}")
     
     current_question = 1
-    
-    for page_num in range(len(doc)):
+    start_page_num=3
+    for page_num in range(start_page_num, len(doc)-start_page_num):
         page = doc[page_num]
         page_width = page.rect.width
         
@@ -89,7 +92,7 @@ def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
             
             if position:
                 x0, y0, x1, y1 = position
-                top_y = max(0, y0 - 15)
+                top_y = max(0, y0-8)
                 
                 y_coordinates.append({
                     "question": current_question,
@@ -113,7 +116,7 @@ def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
                 if i + 1 < len(y_coordinates):
                     y_bottom = y_coordinates[i + 1]["y_start"]
                 else:
-                    y_bottom = page.rect.height - 150
+                    y_bottom = page.rect.height - 50
                 
                 clip_rect = fitz.Rect(0, y_top, page_width, y_bottom)
                 pix = page.get_pixmap(clip=clip_rect, matrix=fitz.Matrix(2, 2))
