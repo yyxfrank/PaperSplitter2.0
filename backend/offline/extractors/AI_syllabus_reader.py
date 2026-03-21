@@ -35,10 +35,10 @@ def process_syllabus_with_ai(pdf_path):
 
     # 4. Craft the strict prompt to get exactly what we need
     prompt = """
-    You are an expert data extraction assistant. I have uploaded the ESAT Physics Guide.
+    You are an expert data extraction assistant. I have uploaded the Exam Guide.
     
     Your task is to extract the syllabus specification guidelines. 
-    Throughout the document, there are sub-chapters with IDs like P1.1, P1.2, P2.1, etc.
+    Throughout the document, there are sub-chapters with IDs like P1.1, P1.2, P2.1, etc. or any similar titles.
     Under each ID, there is a title (e.g., "Electrostatics") and a list of objectives (e.g., "a. Know and understand...").
     
     Please extract EVERY sub-chapter ID, its Title, and its Objectives.
