@@ -30,9 +30,9 @@ def is_valid_question_label(text, question_num):
     
     return False
 
-def find_question_with_advanced_regex(page, question_num):
+def find_question_with_advanced_regex(page, question_num, expected_x=None):
     """
-    Find question number using advanced regex AND exact word coordinates.
+    Find question number using advanced regex and a strict Vertical Anchor.
     """
     blocks = page.get_text("blocks")
     q_str = str(question_num)
@@ -42,30 +42,35 @@ def find_question_with_advanced_regex(page, question_num):
             continue
         bx0, by0, bx1, by1, text = block[:5]
         
-        # 1. Filter: Left side of page only
-        if bx0 > 100:
+        # 1. Broad left-side filter
+        if bx0 > 80: 
             continue
             
-        # 2. Filter: Ignore Headers/Footers
-        if by0 < 25 or by0 > (page.rect.height - 25):
+        # 2. Ignore Headers and Footers
+        if by0 < 50 or by0 > (page.rect.height - 60):
             continue
 
         # 3. Validate context using our advanced regex
         if is_valid_question_label(text, q_str):
             
-            # ---------------------------------------------------------
-            # THE FIX: We found the valid block! Now find the EXACT word 
-            # inside this block to prevent cutting off previous options.
-            # ---------------------------------------------------------
             block_rect = fitz.Rect(bx0, by0, bx1, by1)
             words = page.get_text("words", clip=block_rect)
             
             for w in words:
                 wx0, wy0, wx1, wy1, wtext = w[:5]
                 
-                # The actual number must also be on the left margin
-                if wx0 > 100: 
-                    continue
+                # ---------------------------------------------------------
+                # THE VERTICAL ANCHOR CHECK
+                # ---------------------------------------------------------
+                if expected_x is not None:
+                    # If we have locked the anchor, this number MUST be exactly
+                    # aligned with Question 1 (allow 10 pixels for minor PDF rendering shifts)
+                    if abs(wx0 - expected_x) > 10:
+                        continue 
+                else:
+                    # If we haven't found Question 1 yet, it must be on the extreme edge
+                    if wx0 > 60: 
+                        continue
                 
                 # Clean the word (strip trailing periods or parentheses)
                 clean_wtext = re.sub(r'[\.\)]$', '', wtext.strip())
@@ -73,9 +78,6 @@ def find_question_with_advanced_regex(page, question_num):
                 # If we found the exact number, return ITS precise coordinates
                 if clean_wtext == q_str:
                     return (wx0, wy0, wx1, wy1)
-            
-            # Fallback just in case the exact word wasn't found
-            return (bx0, by0, bx1, by1)
             
     return None
 
@@ -103,13 +105,23 @@ def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
         
         y_coordinates = []
         
+       # Add this variable right before the `while True:` loop
+        expected_q_x = None
+        
         while True:
-            # Find using advanced regex (block processing + regex validation)
-            position = find_question_with_advanced_regex(page, current_question)
+            # Pass the anchor to the search function
+            position = find_question_with_advanced_regex(page, current_question, expected_q_x)
             
             if position:
                 x0, y0, x1, y1 = position
-                top_y = max(0, y0-8)
+                top_y = max(0, y0 - 8)
+                
+                # ---------------------------------------------------------
+                # LOCK THE ANCHOR WHEN WE FIND QUESTION 1
+                # ---------------------------------------------------------
+                if expected_q_x is None:
+                    expected_q_x = x0
+                    print(f"🔒 Locked Question Column Anchor at X={expected_q_x:.2f}")
                 
                 y_coordinates.append({
                     "question": current_question,
