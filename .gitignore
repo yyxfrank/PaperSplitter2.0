@@ -50,6 +50,7 @@ env/
 *.pdf
 data/
 raw_data/
+ExperiData/
 
 # Logs
 *.log
