@@ -26,14 +26,14 @@ def process_and_classify_exam(pdf_path, syllabus_path):
     # 2. The Mega-Prompt: We combine extraction and classification
     # 2. The Ultra-Fast Classification Prompt
     prompt = f"""
-    You are an expert Physics teacher and examiner. 
-    I have uploaded a Physics past paper.
+    You are an expert Physics and Math teacher and examiner. 
+    I have uploaded a Physics and Math past paper.
     
     Here is our official Syllabus in JSON format:
     {syllabus_content}
     
     YOUR TASK:
-    Read every single question in the uploaded exam paper. For each question, compare its underlying physics concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
+    Read every single question in the uploaded exam paper. For each question, compare its underlying physics and math concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
     
     CRITICAL INSTRUCTIONS:
     1. DO NOT transcribe the question text.
@@ -75,8 +75,8 @@ def process_and_classify_exam(pdf_path, syllabus_path):
 # ==========================================
 if __name__ == "__main__":
     pdf_path = r"D:\PycharmProjects\PaperSplitter2.0\ExperiData\ENGAA_2016_S1_QuestionPaper.pdf"
-    syllabus_path = "structured_syllabus.json" # Point this to your syllabus file
-    output_json_path = "classified_questions.json"
+    syllabus_path = "structured_syllabus_math.json" # Point this to your syllabus file
+    output_json_path = "classified_questions_math.json"
     
     try:
         json_data = process_and_classify_exam(pdf_path, syllabus_path)

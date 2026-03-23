@@ -70,8 +70,8 @@ def process_syllabus_with_ai(pdf_path):
 # Run the Extraction
 # ==========================================
 if __name__ == "__main__":
-    pdf_path = r"D:\PycharmProjects\PaperSplitter2.0\ExperiData\ESAT_Guide_Physics_June2025.pdf"
-    output_json_path = "structured_syllabus.json"
+    pdf_path = r"D:\PycharmProjects\PaperSplitter2.0\ExperiData\TMUA_Content_Specification_April2025.pdf"
+    output_json_path = "structured_syllabus_math.json"
     
     try:
         # Extract the data
