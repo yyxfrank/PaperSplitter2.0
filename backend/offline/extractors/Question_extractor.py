@@ -2,6 +2,45 @@ import fitz  # PyMuPDF
 import re
 import os
 
+def extract_paper_name_from_filename(pdf_path):
+    """
+    extract paper name and year from PDF name
+
+    
+    - ENGAA_2016_S1_QuestionPaper.pdf → ENGAA_2016_S1
+    - ESAT_Physics_2025_June.pdf → ESAT_Physics_2025
+    - TMUA_2024_Paper1.pdf → TMUA_2024_Paper1
+    
+    Args:
+        pdf_path: PDF文件路径
+        
+    Returns:
+        str: 提取的试卷名称
+    """
+    # 获取文件名（不含路径）
+    filename = os.path.basename(pdf_path)
+    
+    # 去掉 .pdf 扩展名
+    name_without_ext = os.path.splitext(filename)[0]
+    
+    # 移除常见的后缀关键词
+    suffixes_to_remove = [
+        '_QuestionPaper',
+        '_Question_Paper',
+        '_QP',
+        '_Paper',
+        '_Exam',
+        '_Test'
+    ]
+    
+    paper_name = name_without_ext
+    for suffix in suffixes_to_remove:
+        if suffix in paper_name:
+            paper_name = paper_name.split(suffix)[0]
+            break
+    
+    return paper_name
+
 def is_valid_question_label(text, question_num):
     """
     Validate if text is a valid question label.
@@ -81,7 +120,7 @@ def find_question_with_advanced_regex(page, question_num, expected_x=None):
             
     return None
 
-def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
+def auto_slice_entire_exam(pdf_path, paper_name, output_folder="output_questions"):
     """
     Automatically slice entire exam paper (enhanced anti-false-positive version).
     
@@ -97,6 +136,11 @@ def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
         os.makedirs(output_folder)
         print(f"📁 Created output folder: {output_folder}")
     
+    paper_folder = os.path.join(output_folder, paper_name)
+    
+    if not os.path.exists(paper_folder):
+        os.makedirs(paper_folder)
+        print(f"📁 Created paper-specific folder: {paper_folder}")
     current_question = 1
     start_page_num=3
     for page_num in range(start_page_num, len(doc)-start_page_num):
@@ -151,13 +195,13 @@ def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
                 pix = page.get_pixmap(clip=clip_rect, matrix=fitz.Matrix(2, 2))
                 
                 # Save to output folder
-                output_filename = os.path.join(output_folder, f"Question_{q_num}.png")
+                output_filename = os.path.join(paper_folder, f"Question_{q_num}.png")
                 pix.save(output_filename)
                 
                 print(f"  💾 Saved: {output_filename}")
     
     print(f"\n✅ Finished! Total questions: {current_question - 1}")
-    print(f"📂 All images saved to: {os.path.abspath(output_folder)}")
+    print(f"📂 All images saved to: {os.path.abspath(paper_folder)}")
     
     return current_question - 1
 
@@ -165,6 +209,11 @@ def auto_slice_entire_exam(pdf_path, output_folder="output_questions"):
 # Run the Auto-Slicer
 # ==========================================
 if __name__ == "__main__":
-    # Just point it to your file, and let it do all the work!
+    # 只需要提供PDF文件路径，程序会自动从文件名中提取试卷名称
     pdf_file = r"D:\PycharmProjects\PaperSplitter2.0\ExperiData\ENGAA_2016_S1_QuestionPaper.pdf" 
-    auto_slice_entire_exam(pdf_file)
+    
+    # 自动提取试卷名称
+    paper_name = extract_paper_name_from_filename(pdf_file)
+    print(f"📋 从文件名提取的试卷名称: {paper_name}")
+    
+    auto_slice_entire_exam(pdf_file, paper_name)
