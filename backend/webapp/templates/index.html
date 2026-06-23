@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Syllabus{% endblock %}
+
+{% block content %}
+<div class="syllabus-layout">
+    <!-- ========== SIDEBAR: Table of Contents ========== -->
+    <aside class="toc-sidebar">
+        <h2 class="toc-title">Table of Contents</h2>
+        {% if grouped %}
+            <nav class="toc-nav">
+                {% for chapter_prefix, topics in grouped.items() %}
+                    <div class="toc-chapter-group">
+                        <h3 class="toc-chapter-heading">Chapter {{ chapter_prefix }}</h3>
+                        <ul class="toc-list">
+                            {% for topic in topics %}
+                                <li>
+                                    <a href="#{{ topic['topic_id'] }}" class="toc-link">
+                                        <span class="toc-id">{{ topic['topic_id'] }}</span>
+                                        <span class="toc-title">{{ topic['title'] }}</span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </nav>
+        {% else %}
+            <p class="empty-state">No syllabus data found.</p>
+        {% endif %}
+    </aside>
+
+    <!-- ========== MAIN CONTENT: Full Syllabus ========== -->
+    <div class="syllabus-content">
+        <h1 class="page-title">Syllabus</h1>
+
+        {% if grouped is none %}
+            <div class="empty-state">
+                <h2>No Database Found</h2>
+                <p>The master database <code>master_exam_data.db</code> has not been created yet.</p>
+                <ol class="setup-steps">
+                    <li>Run your data pipeline to extract a syllabus and classify questions.</li>
+                    <li>Run <code>build_database.py</code> to populate the database.</li>
+                    <li>Refresh this page.</li>
+                </ol>
+            </div>
+        {% elif grouped %}
+            {% for chapter_prefix, topics in grouped.items() %}
+                <section class="chapter-section">
+                    <h2 class="chapter-header">Chapter {{ chapter_prefix }}</h2>
+                    {% for topic in topics %}
+                        <article id="{{ topic['topic_id'] }}" class="topic-card">
+                            <div class="topic-card-header">
+                                <span class="topic-id-badge">{{ topic['topic_id'] }}</span>
+                                <h3 class="topic-title">{{ topic['title'] }}</h3>
+                                <a href="{{ url_for('topic_detail', topic_id=topic['topic_id']) }}" class="btn-view-questions">
+                                    View Questions →
+                                </a>
+                            </div>
+                            <div class="topic-objectives">
+                                {% set objectives = topic['objectives'].split('. ') %}
+                                <ul>
+                                    {% for obj in objectives %}
+                                        <li>{{ obj }}{% if not obj.endswith('.') %}.{% endif %}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </section>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic['topic_id'] }} — {{ topic['title'] }}{% endblock %}
+
+{% block content %}
+<div class="topic-detail">
+    <!-- Breadcrumb navigation -->
+    <nav class="breadcrumb">
+        <a href="{{ url_for('syllabus') }}">Syllabus</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>{{ topic['topic_id'] }} {{ topic['title'] }}</span>
+    </nav>
+
+    <!-- Topic header -->
+    <div class="topic-header">
+        <span class="topic-id-badge topic-id-badge--lg">{{ topic['topic_id'] }}</span>
+        <h1>{{ topic['title'] }}</h1>
+    </div>
+
+    <!-- Objectives -->
+    <div class="topic-objectives topic-objectives--detail">
+        <h3>Learning Objectives</h3>
+        {% set objectives = topic['objectives'].split('. ') %}
+        <ul>
+            {% for obj in objectives %}
+                <li>{{ obj }}{% if not obj.endswith('.') %}.{% endif %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Questions -->
+    <section class="questions-section">
+        <h2>Questions ({{ questions|length }})</h2>
+
+        {% if questions|length == 0 %}
+            <div class="empty-state">
+                <p>No questions have been classified under this topic yet.</p>
+            </div>
+        {% else %}
+            {% for paper_name, paper_questions in questions_by_paper.items() %}
+                <div class="paper-group">
+                    <h3 class="paper-name">{{ paper_name }}</h3>
+                    <div class="question-grid">
+                        {% for q in paper_questions %}
+                            <div class="question-card">
+                                <div class="question-card-header">
+                                    <span class="question-number">Question {{ q['question_number'] }}</span>
+                                    <span class="question-paper">{{ q['paper_name'] }}</span>
+                                </div>
+                                <div class="question-image-wrapper">
+                                    <img
+                                        src="{{ url_for('question_images', filename=q['image_path']) }}"
+                                        alt="Question {{ q['question_number'] }} from {{ q['paper_name'] }}"
+                                        class="question-image"
+                                        loading="lazy"
+                                        onclick="openLightbox(this)"
+                                    />
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </section>
+</div>
+
+<!-- Lightbox overlay for enlarged image viewing -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close">&times;</span>
+    <img class="lightbox-content" id="lightbox-img" alt="Enlarged question" />
+</div>
+{% endblock %}

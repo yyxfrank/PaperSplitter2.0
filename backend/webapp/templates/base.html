@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}PaperSplitter{% endblock %} — Exam Paper Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+    <!-- Top navigation bar -->
+    <header class="top-bar">
+        <div class="top-bar-inner">
+            <a href="{{ url_for('syllabus') }}" class="logo">PaperSplitter</a>
+            <nav class="nav-links">
+                <a href="{{ url_for('syllabus') }}">Syllabus</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

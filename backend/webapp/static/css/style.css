@@ -1,0 +1,462 @@
+/* ============================================================
+   PaperSplitter — Global Styles
+   ============================================================ */
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+                 Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    color: #1a1a2e;
+    background: #f5f6fa;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+a {
+    color: #2d6a9f;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* --- Top Navigation --- */
+.top-bar {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.top-bar-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    gap: 2rem;
+}
+
+.logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff !important;
+    letter-spacing: 0.5px;
+}
+
+.nav-links a {
+    color: #b0b8c8 !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.nav-links a:hover {
+    color: #fff !important;
+    text-decoration: none;
+}
+
+/* --- Main Content --- */
+.main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ============================================================
+   Syllabus Page — Two-Column Layout
+   ============================================================ */
+
+.syllabus-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+/* --- Sidebar Table of Contents --- */
+.toc-sidebar {
+    flex: 0 0 280px;
+    position: sticky;
+    top: 72px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+}
+
+.toc-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e8e8f0;
+}
+
+.toc-chapter-group {
+    margin-bottom: 1.25rem;
+}
+
+.toc-chapter-heading {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.toc-list {
+    list-style: none;
+}
+
+.toc-list li {
+    margin-bottom: 0.3rem;
+}
+
+.toc-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    color: #374151 !important;
+    transition: background 0.15s;
+}
+.toc-link:hover {
+    background: #eff3f9;
+    text-decoration: none;
+}
+
+.toc-id {
+    font-weight: 600;
+    color: #2d6a9f;
+    min-width: 3.2em;
+    font-size: 0.8rem;
+}
+
+.toc-title {
+    color: #4b5563;
+}
+
+/* --- Syllabus Main Content --- */
+.syllabus-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1a1a2e;
+}
+
+/* --- Chapter Sections --- */
+.chapter-section {
+    margin-bottom: 2.5rem;
+}
+
+.chapter-header {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid #2d6a9f;
+}
+
+/* --- Topic Card --- */
+.topic-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    border-left: 4px solid #2d6a9f;
+    transition: box-shadow 0.2s;
+}
+.topic-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.topic-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.topic-id-badge {
+    display: inline-block;
+    background: #2d6a9f;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+}
+
+.topic-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    flex: 1;
+}
+
+.btn-view-questions {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #2d6a9f !important;
+    padding: 0.35rem 0.75rem;
+    border: 1.5px solid #2d6a9f;
+    border-radius: 6px;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.btn-view-questions:hover {
+    background: #2d6a9f;
+    color: #fff !important;
+    text-decoration: none;
+}
+
+.topic-objectives ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+.topic-objectives ul li {
+    margin-bottom: 0.2rem;
+}
+
+/* ============================================================
+   Topic Detail Page
+   ============================================================ */
+
+.topic-detail {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+.breadcrumb a {
+    color: #2d6a9f;
+}
+.breadcrumb-sep {
+    margin: 0 0.5rem;
+    color: #9ca3af;
+}
+
+.topic-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.topic-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+.topic-id-badge--lg {
+    font-size: 1rem;
+    padding: 0.3rem 0.8rem;
+}
+
+.topic-objectives--detail {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.topic-objectives--detail h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.75rem;
+}
+
+/* --- Questions Section --- */
+.questions-section h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e8e8f0;
+}
+
+.paper-group {
+    margin-bottom: 2rem;
+}
+
+.paper-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    background: #eef2f7;
+    border-radius: 6px;
+}
+
+.question-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.25rem;
+}
+
+.question-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.question-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.question-card-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    background: #f9fafb;
+    border-bottom: 1px solid #e8e8f0;
+}
+
+.question-number {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1a1a2e;
+}
+
+.question-paper {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.question-image-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0.75rem;
+    cursor: zoom-in;
+}
+
+.question-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
+}
+
+/* ============================================================
+   Lightbox
+   ============================================================ */
+
+.lightbox {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox-content {
+    max-width: 92%;
+    max-height: 92%;
+    border-radius: 6px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 32px;
+    font-size: 2.5rem;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 300;
+    line-height: 1;
+}
+
+/* ============================================================
+   Empty State
+   ============================================================ */
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.empty-state h2 {
+    margin-bottom: 0.75rem;
+}
+.empty-state p {
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+.setup-steps {
+    text-align: left;
+    display: inline-block;
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+.setup-steps li {
+    margin-bottom: 0.3rem;
+}
+code {
+    background: #eef2f7;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 900px) {
+    .syllabus-layout {
+        flex-direction: column;
+    }
+    .toc-sidebar {
+        flex: none;
+        width: 100%;
+        position: static;
+        max-height: none;
+    }
+    .question-grid {
+        grid-template-columns: 1fr;
+    }
+}
