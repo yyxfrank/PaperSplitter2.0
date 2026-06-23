@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}PaperSplitter{% endblock %} — Exam Paper Manager</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <!-- MathJax: render LaTeX formulas ($...$ / $$...$$) in syllabus objectives -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 </head>
 <body>
     <!-- Top navigation bar -->
