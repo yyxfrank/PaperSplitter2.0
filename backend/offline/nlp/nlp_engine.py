@@ -1,6 +1,6 @@
 from sentence_transformers import SentenceTransformer, util
 import json
-
+"""This module is only used if the AI_question_translater is not functional."""
 def match_question_to_chapter(question_file_path, chapters_file_path):
     print("Loading AI model (this takes a moment the first time)...")
     model = SentenceTransformer('all-MiniLM-L6-v2')

@@ -12,18 +12,17 @@ def extract_paper_name_from_filename(pdf_path):
     - TMUA_2024_Paper1.pdf → TMUA_2024_Paper1
     
     Args:
-        pdf_path: PDF文件路径
+        pdf_path: PDF file path
         
     Returns:
-        str: 提取的试卷名称
+        str: paper name
     """
-    # 获取文件名（不含路径）
     filename = os.path.basename(pdf_path)
     
-    # 去掉 .pdf 扩展名
+    # remove .pdf 
     name_without_ext = os.path.splitext(filename)[0]
     
-    # 移除常见的后缀关键词
+    # remove common suffix keywords
     suffixes_to_remove = [
         '_QuestionPaper',
         '_Question_Paper',
@@ -209,11 +208,10 @@ def auto_slice_entire_exam(pdf_path, paper_name, output_folder="output_questions
 # Run the Auto-Slicer
 # ==========================================
 if __name__ == "__main__":
-    # 只需要提供PDF文件路径，程序会自动从文件名中提取试卷名称
     pdf_file = r"D:\PycharmProjects\PaperSplitter2.0\ExperiData\ENGAA_2016_S1_QuestionPaper.pdf" 
     
-    # 自动提取试卷名称
+    # extract paper name from filename
     paper_name = extract_paper_name_from_filename(pdf_file)
-    print(f"📋 从文件名提取的试卷名称: {paper_name}")
+    print(f"Paper name: {paper_name}")
     
     auto_slice_entire_exam(pdf_file, paper_name)

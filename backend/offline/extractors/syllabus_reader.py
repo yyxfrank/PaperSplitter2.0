@@ -1,6 +1,8 @@
 import pdfplumber
 import re
-
+"""
+This module is only used to extract text from a syllabus PDF file if the AI_syllabus_reader cannot read the content.
+"""
 def extract_syllabus_text(pdf_path,start_page,end_page):
     """
     Extracts and returns all text from a given PDF file.
