@@ -7,7 +7,7 @@ _PROJECT_ROOT = os.path.abspath(
 )
 
 DB_PATH = os.path.join(_PROJECT_ROOT, "master_exam_data.db")
-IMAGE_BASE_DIR = os.path.join(_PROJECT_ROOT, "output_questions")
+IMAGE_BASE_DIR = _PROJECT_ROOT  # send_from_directory will receive the full relative path including "output_questions/..."
 
 
 def get_db_connection():
