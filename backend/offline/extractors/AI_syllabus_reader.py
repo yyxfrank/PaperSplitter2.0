@@ -44,7 +44,8 @@ def process_syllabus_with_ai(pdf_path):
         {
             "id": "P1.1",
             "title": "Electrostatics",
-            "objectives": "a: Know and understand that insulators... b: Know that charging..."
+            "objectives": "a: Know and understand that insulators... 
+                            b: Know that charging..."
         }
     ]
     """
@@ -53,7 +54,7 @@ def process_syllabus_with_ai(pdf_path):
     response = client.models.generate_content(
         model='gemini-2.5-flash',
         contents=[pdf_file, prompt],
-        config=types.GenerateContentConfig(max_output_tokens=10000)
+        config=types.GenerateContentConfig(max_output_tokens=100000)
     )
 
     # Clean up the output (sometimes the AI wraps JSON in markdown block quotes like ```json ... ```)

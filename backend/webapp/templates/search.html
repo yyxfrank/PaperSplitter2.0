@@ -8,7 +8,7 @@
     <h1 style="margin-bottom:1rem;">
         {% if keyword %}
             搜索结果："{{ keyword }}"
-            <span style="font-size:1rem; color:#6b7280;">（共 {{ results|length }} 个匹配）</span>
+            <span style="font-size:1rem; color:#6b7280;">（共 {{ topics|length }} 个匹配）</span>
         {% else %}
             请输入关键字搜索
         {% endif %}
@@ -21,7 +21,7 @@
         </div>
 
     <!-- 场景 2：有输入但没匹配到 -->
-    {% elif results|length == 0 %}
+    {% elif topics|length == 0 %}
         <div class="empty-state">
             <h2>没有匹配到 "{{ keyword }}"</h2>
             <p>试试其他关键字，或<a href="{{ url_for('syllabus') }}">返回大纲首页</a>浏览全部章节。</p>
@@ -29,7 +29,7 @@
 
     <!-- 场景 3：有匹配结果 -->
     {% else %}
-        {% for topic in results %}
+        {% for topic in topics %}
             <article class="topic-card" style="margin-bottom:1rem;">
                 <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
                     <span class="topic-id-badge">{{ topic['topic_id'] }}</span>

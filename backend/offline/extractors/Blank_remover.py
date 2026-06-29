@@ -51,10 +51,11 @@ def batch_trim_folder(folder_path):
     print(f"Starting whitespace trimmer in folder: {folder_path}\n")
     
     # Loop through all files in the directory
-    for filename in os.listdir(folder_path):
-        if filename.lower().endswith(".png"):
-            file_path = os.path.join(folder_path, filename)
-            trim_bottom_whitespace(file_path)
+    for root,dirs,files in os.walk(folder_path):
+        for filename in files:
+            if filename.lower().endswith(".png"):
+                file_path = os.path.join(root, filename)
+                trim_bottom_whitespace(file_path)
             
     print("\n✅ All images perfectly trimmed!")
 

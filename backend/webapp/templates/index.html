@@ -58,7 +58,7 @@
                                 </a>
                             </div>
                             <div class="topic-objectives">
-                                {% set objectives = topic['objectives'].split('. ') %}
+                                {% set objectives = topic['objectives'].split('\n') %}
                                 <ul>
                                     {% for obj in objectives %}
                                         <li>{{ obj }}{% if not obj.endswith('.') %}.{% endif %}</li>

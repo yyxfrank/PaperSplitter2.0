@@ -107,7 +107,7 @@ def find_question_with_advanced_regex(page, question_num, expected_x=None):
                         continue 
                 else:
                     # If we haven't found Question 1 yet, it must be on the extreme edge
-                    if wx0 > 60: 
+                    if wx0 > 120: 
                         continue
                 
                 # Clean the word (strip trailing periods or parentheses)
@@ -208,7 +208,7 @@ def auto_slice_entire_exam(pdf_path, paper_name, output_folder="output_questions
 # Run the Auto-Slicer
 # ==========================================
 if __name__ == "__main__":
-    pdf_file = r"D:\Python Projects\PaperSplitter2.0\ExperiData\ENGAA_2016_S1_QuestionPaper.pdf" 
+    pdf_file = r"D:\Python Projects\PaperSplitter2.0\ExperiData\ENGAA_2018_S1_QuestionPaper.pdf" 
     
     # extract paper name from filename
     paper_name = extract_paper_name_from_filename(pdf_file)

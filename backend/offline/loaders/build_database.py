@@ -26,7 +26,8 @@ def append_to_database(paper_name, syllabus_json, classified_json, image_folder,
             question_number INTEGER,
             topic_id TEXT,
             image_path TEXT,
-            FOREIGN KEY(topic_id) REFERENCES syllabus(topic_id)
+            FOREIGN KEY(topic_id) REFERENCES syllabus(topic_id),
+            UNIQUE (paper_name, question_number)
         )
     ''')
     
@@ -64,7 +65,8 @@ def append_to_database(paper_name, syllabus_json, classified_json, image_folder,
             # Insert the new question, attaching the paper_name to it!
             cursor.execute('''
                 INSERT INTO questions (paper_name, question_number, topic_id, image_path)
-                VALUES (?, ?, ?, ?)
+                VALUES (?, ?, ?, ?) ON CONFLICT(paper_name, question_number) DO UPDATE 
+                SET image_path = excluded.image_path, topic_id=excluded.topic_id
             ''', (paper_name, q_num, t_id, img_path))
             
             added_count += 1
@@ -79,9 +81,9 @@ def append_to_database(paper_name, syllabus_json, classified_json, image_folder,
 # ==========================================
 if __name__ == "__main__":
     # Every time you process a new paper, just update these variables and run the script!
-    PAPER_IDENTIFIER = "ENGAA_2016"  # Next time, change this to "ENGAA_2017"
-    SYLLABUS_FILE = "structured_syllabus.json" 
-    CLASSIFIED_FILE = "classified_questions.json" # The JSON you just got from Gemini
+    PAPER_IDENTIFIER = "ENGAA_2016_S1"  # Next time, change this to "ENGAA_2017"
+    SYLLABUS_FILE = "structured_syllabus_physics.json" 
+    CLASSIFIED_FILE = "classified_questions_physics.json" # The JSON you just got from Gemini
     IMAGE_DIR = "output_questions" 
     
     append_to_database(PAPER_IDENTIFIER, SYLLABUS_FILE, CLASSIFIED_FILE, IMAGE_DIR)

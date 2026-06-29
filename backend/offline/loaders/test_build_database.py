@@ -1,7 +1,7 @@
 import sqlite3
 
 # Connect to our newly created database
-conn = sqlite3.connect("exam_data.db")
+conn = sqlite3.connect("master_exam_data.db")
 cursor = conn.cursor()
 
 # Let's pretend a student clicked on chapter P1.1 on the website
@@ -21,6 +21,30 @@ results = cursor.fetchall()
 
 if not results:
     print("No questions found for this topic.")
+else:
+    for row in results:
+        chapter_title = row[0]
+        q_num = row[1]
+        img_path = row[2]
+        print(f"[{chapter_title}] -> Found Question {q_num} located at: {img_path}")
+
+
+target_paper = "ENGAA_2018_S1"
+
+print(f"\n🔍 Searching for questions in Paper {target_paper}...\n")
+
+# A SQL JOIN query: Gets the image path and the chapter title together!
+cursor.execute('''
+    SELECT syllabus.title, questions.question_number, questions.image_path 
+    FROM questions
+    JOIN syllabus ON questions.topic_id = syllabus.topic_id
+    WHERE questions.paper_name= ?
+''', (target_paper,))
+
+results = cursor.fetchall()
+
+if not results:
+    print("No questions found for this paper.")         
 else:
     for row in results:
         chapter_title = row[0]

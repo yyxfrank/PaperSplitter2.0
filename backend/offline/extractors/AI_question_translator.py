@@ -38,14 +38,14 @@ def process_and_classify_exam(pdf_path, syllabus_path):
     {syllabus_content}
 
     YOUR TASK:
-    Read every single question in the uploaded exam paper. For each question, compare its underlying physics concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
+    Read every single question for which the question number is even in the uploaded exam paper. For each question, compare its underlying physics concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
 
     CRITICAL INSTRUCTIONS:
     1. DO NOT transcribe the question text.
     2. DO NOT extract options or write image descriptions.
     3. ONLY output the question number and the matching topic_id.
     4. If a question covers multiple topics, pick the primary one.
-    5. If a question has more to do with math than physics, skip it and move on to the next question.
+    
     Output STRICTLY as a JSON array of objects.
 
     Use the following exact JSON format:
@@ -65,7 +65,7 @@ def process_and_classify_exam(pdf_path, syllabus_path):
     response = client.models.generate_content(
         model='gemini-2.5-flash',
         contents=[pdf_file, prompt],
-        config=types.GenerateContentConfig(max_output_tokens=8192)
+        config=types.GenerateContentConfig(max_output_tokens=1000000)
     )
 
     raw_text = response.text
