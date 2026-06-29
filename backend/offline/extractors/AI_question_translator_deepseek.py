@@ -60,21 +60,21 @@ def process_and_classify_exam(pdf_path, syllabus_path):
 
     # 3. Build the prompt
     prompt = f"""
-You are an expert Physics and Math teacher and examiner.
-I have a Physics and Math past paper (full text extracted below).
+You are an expert Physics teacher and examiner.
+I have a Physics past paper (full text extracted below).
 
 Here is our official Syllabus in JSON format:
 {syllabus_content}
 
 YOUR TASK:
-Read every single question in the exam paper below. For each question, compare its underlying physics and math concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
+Read every single question in the exam paper below. For each question, compare its underlying physics concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
 
 CRITICAL INSTRUCTIONS:
 1. DO NOT transcribe the question text.
 2. DO NOT extract options or write image descriptions.
 3. ONLY output the question number and the matching topic_id.
 4. If a question covers multiple topics, pick the primary one.
-
+5. If a question has more to do with math than physics, skip it and move on to the next question.
 Output STRICTLY as a JSON array of objects.
 
 Use the following exact JSON format:

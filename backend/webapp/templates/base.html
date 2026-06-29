@@ -25,6 +25,15 @@
             <nav class="nav-links">
                 <a href="{{ url_for('syllabus') }}">Syllabus</a>
             </nav>
+            <form action="{{ url_for('search') }}" method="get" style="margin-left:auto; display:flex; gap:0.5rem;">
+            <input type="text"
+                    name="q"
+                    placeholder="搜索章节..."
+                    value="{{ request.args.get('q', '') }}"
+                    style="padding:0.35rem 0.75rem; border-radius:4px; border:1px solid #444; background:#2a2a3e; color:#fff; font-size:0.85rem;">
+            <button type="submit"
+                    style="padding:0.35rem 0.75rem; border-radius:4px; border:none; background:#2d6a9f; color:#fff; font-size:0.85rem; cursor:pointer;">搜索</button>
+</form>
         </div>
     </header>
 

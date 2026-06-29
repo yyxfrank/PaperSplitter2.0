@@ -1,5 +1,5 @@
 pymupdf
-google-generativeai
+google-genai
 pillow
 numpy
 pdfplumber

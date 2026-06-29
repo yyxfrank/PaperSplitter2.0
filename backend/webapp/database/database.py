@@ -92,3 +92,17 @@ def get_all_topics_grouped():
         grouped[prefix].append(dict(topic))
 
     return grouped
+
+def search_topics(keyword):
+    """Return topics matching the given keyword in title or objectives."""
+    conn = get_db_connection()
+    if conn is None:
+        return None
+    try:
+        topics = conn.execute(
+            "SELECT * FROM syllabus WHERE title LIKE ? OR objectives LIKE ?",
+            (f"%{keyword}%", f"%{keyword}%"),
+        ).fetchall()
+        return topics
+    finally:
+        conn.close()

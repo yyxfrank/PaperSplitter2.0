@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, render_template, abort, send_from_directory
+from flask import Flask, render_template, abort, send_from_directory,request
 
 # Add parent dirs so we can import the database module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -10,6 +10,7 @@ from database.database import (
     get_all_topics_grouped,
     get_topic,
     get_questions_by_topic,
+    search_topics,
     IMAGE_BASE_DIR,
 )
 
@@ -75,7 +76,28 @@ def question_images(filename):
         abort(404, "No question images found. Run the extraction pipeline first.")
     return send_from_directory(IMAGE_BASE_DIR, filename)
 
-
+@app.route("/search")
+def search():
+    """Search for topics by title or objectives."""
+    keyword=request.args.get("q","").strip()
+    topics=None
+    status="no_keyword"
+    if keyword:
+        topics=search_topics(keyword)
+        if topics is None:
+            status="no_database"
+        else:
+            status="has_results"
+    return render_template(
+            "search.html",
+            topics=topics,
+            status=status,
+            keyword=keyword,
+        )
+    
+@app.errorhandler(404)
+def not_found(error):
+    return render_template("404.html",error_msg=error.description), 404
 # ----------------------------------------------------------------
 # Launch
 # ----------------------------------------------------------------

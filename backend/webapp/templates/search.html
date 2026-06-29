@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}搜索“{{ keyword }}”结果{% endblock %}
+{% block content %}
+<div style="max-width:1000px; margin:0 auto; padding:2rem;">
+
+    <!-- 搜索状态提示 -->
+    <h1 style="margin-bottom:1rem;">
+        {% if keyword %}
+            搜索结果："{{ keyword }}"
+            <span style="font-size:1rem; color:#6b7280;">（共 {{ results|length }} 个匹配）</span>
+        {% else %}
+            请输入关键字搜索
+        {% endif %}
+    </h1>
+
+    <!-- 场景 1：没输入关键字 -->
+    {% if not keyword %}
+        <div class="empty-state">
+            <p>在顶部搜索栏输入你想找的章节关键字即可。</p>
+        </div>
+
+    <!-- 场景 2：有输入但没匹配到 -->
+    {% elif results|length == 0 %}
+        <div class="empty-state">
+            <h2>没有匹配到 "{{ keyword }}"</h2>
+            <p>试试其他关键字，或<a href="{{ url_for('syllabus') }}">返回大纲首页</a>浏览全部章节。</p>
+        </div>
+
+    <!-- 场景 3：有匹配结果 -->
+    {% else %}
+        {% for topic in results %}
+            <article class="topic-card" style="margin-bottom:1rem;">
+                <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                    <span class="topic-id-badge">{{ topic['topic_id'] }}</span>
+                    <h3 style="font-size:1.1rem; font-weight:600; flex:1;">{{ topic['title'] }}</h3>
+                    <a href="{{ url_for('topic_detail', topic_id=topic['topic_id']) }}"
+                       class="btn-view-questions">查看题目 →</a>
+                </div>
+                <div style="color:#4b5563; font-size:0.9rem;">
+                    {{ topic['objectives'][:200] }}{% if topic['objectives']|length > 200 %}...{% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    {% endif %}
+
+</div>
+{% endblock %}
