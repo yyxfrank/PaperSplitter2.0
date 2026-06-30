@@ -5,3 +5,4 @@ numpy
 pdfplumber
 flask
 openai
+python-dotenv

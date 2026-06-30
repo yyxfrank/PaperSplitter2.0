@@ -8,16 +8,20 @@ import os
 import configparser
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # 项目根目录
 _PROJECT_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..")
 )
 
+load_dotenv(dotenv_path=os.path.join(_PROJECT_ROOT, ".env"))
+
 # 数据库配置（默认值）
 DB_CONFIG = {
     "host": os.environ.get("MYSQL_HOST", "localhost"),
     "user": os.environ.get("MYSQL_USER", "root"),
-    "password": os.environ.get("MYSQL_PASSWORD", "Guo20071116#"),
+    "password": os.environ.get("MYSQL_PASSWORD", ""),
     "database": os.environ.get("MYSQL_DATABASE", "exam_system"),
     "charset": "utf8mb4",
     "collation": "utf8mb4_unicode_ci",
