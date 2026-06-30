@@ -45,6 +45,9 @@ env/
 *.db
 *.sqlite
 *.sqlite3
+config/
+configs/
+db_config
 
 # PDF files (raw data)
 *.pdf
