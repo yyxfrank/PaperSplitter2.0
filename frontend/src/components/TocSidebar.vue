@@ -18,6 +18,26 @@
   <aside class="toc-sidebar">
     <h2 class="toc-title">Table of Contents</h2>
 
+    <!-- ===== Physics / Math 大板块切换 ===== -->
+    <div class="subject-tabs">
+      <button
+        class="subject-tab"
+        :class="{ active: modelValue === 'physics' }"
+        @click="$emit('update:modelValue', 'physics')"
+      >
+        <span class="subject-icon">⚛</span>
+        <span>Physics</span>
+      </button>
+      <button
+        class="subject-tab"
+        :class="{ active: modelValue === 'math' }"
+        @click="$emit('update:modelValue', 'math')"
+      >
+        <span class="subject-icon">∑</span>
+        <span>Math</span>
+      </button>
+    </div>
+
     <!--
       v-if / v-else：Vue 的条件渲染
       对比原来 Jinja2：{% if grouped %} ... {% else %} ... {% endif %}
@@ -26,7 +46,7 @@
       <nav class="toc-nav">
         <!--
           v-for 遍历对象：v-for="(value, key) in object"
-          grouped 是 { 'P': [...], 'S': [...], ... }
+          grouped 是 { 'P': [...], 'S': [...], ... } 或 { 'M1': [...], 'M2': [...] }
           Object.entries() 把对象转成可遍历的数组
         -->
         <div
@@ -48,7 +68,7 @@
                 @click.prevent="handleTocClick(topic.topic_id)"
               >
                 <span class="toc-id">{{ topic.topic_id }}</span>
-                <span class="toc-label">{{ topic.title }}</span>
+                <span class="toc-label">{{ topicLabel(topic) }}</span>
               </a>
             </li>
           </ul>
@@ -62,14 +82,26 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import type { GroupedTopics } from '@/types'
+import type { GroupedTopics, Topic, Subject } from '@/types'
 
-defineProps<{
+const props = defineProps<{
+  modelValue: Subject
   grouped: GroupedTopics | null
+}>()
+
+defineEmits<{
+  'update:modelValue': [value: Subject]
 }>()
 
 // 当前高亮的 topic_id
 const activeId = ref('')
+
+/** 兼容显示 topic 名称：physics 有 title，math 用 chapter 作为 fallback */
+function topicLabel(topic: Topic): string {
+  if ('title' in topic && topic.title) return topic.title
+  if ('chapter' in topic && topic.chapter) return topic.chapter
+  return topic.topic_id
+}
 
 /* ================================================================
    平滑滚动（原来 main.js#L31-L43 的 TOC 滚动）
@@ -218,5 +250,41 @@ onUnmounted(() => {
   color: #9ca3af;
   font-size: 0.9rem;
   text-align: center;
+}
+
+/* ----- Physics / Math 板块切换标签 ----- */
+.subject-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.subject-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.5rem;
+  border: 2px solid #e0e7f0;
+  border-radius: 8px;
+  background: #f9fafb;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.subject-tab:hover {
+  background: #eff3f9;
+  border-color: #c8d4e3;
+}
+.subject-tab.active {
+  background: #2d6a9f;
+  border-color: #2d6a9f;
+  color: #fff;
+}
+.subject-icon {
+  font-size: 1.1rem;
 }
 </style>

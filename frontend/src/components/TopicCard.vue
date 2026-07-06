@@ -28,9 +28,9 @@
       <el-tag type="primary" size="small" effect="dark">
         {{ topic.topic_id }}
       </el-tag>
-      <h3 class="topic-title">{{ topic.title }}</h3>
+      <h3 class="topic-title">{{ displayTitle }}</h3>
       <router-link
-        :to="`/topic/${topic.topic_id}`"
+        :to="`/topic/${subject}/${topic.topic_id}`"
         class="btn-view-questions"
       >
         View Questions →
@@ -54,11 +54,24 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Topic } from '@/types'
+import type { Topic, Subject } from '@/types'
 
 const props = defineProps<{
+  subject: Subject
   topic: Topic
 }>()
+
+/**
+ * displayTitle — 兼容 physics/math 的标题显示
+ *
+ * physics: topic 有 title 属性
+ * math: topic 没有 title，用 chapter 作为显示名称
+ */
+const displayTitle = computed(() => {
+  if ('title' in props.topic && props.topic.title) return props.topic.title
+  if ('chapter' in props.topic && props.topic.chapter) return props.topic.chapter
+  return props.topic.topic_id
+})
 
 /**
  * computed — 计算属性

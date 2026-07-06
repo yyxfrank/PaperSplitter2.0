@@ -15,7 +15,15 @@
       现在变成 <TocSidebar> 组件标签，一行搞定。
       好处：这个页面文件更短、更聚焦。
     -->
-    <TocSidebar :grouped="grouped" />
+    <!--
+      v-model:modelValue — 双向绑定 activeSubject
+      TocSidebar 里点击 Physics/Math 标签时会 emit update:modelValue，
+      这里自动更新 activeSubject，同时 grouped 数据自动重新加载
+    -->
+    <TocSidebar
+      v-model:modelValue="activeSubject"
+      :grouped="grouped"
+    />
 
     <!--
       ===== 右侧：主内容区 =====
@@ -92,9 +100,10 @@
           >
             <!--
               :topic="topic" → 把当前话题数据传给子组件
+              :subject="activeSubject" → 告知当前所属学科，用于路由跳转和标题显示
               不加冒号就是字符串 "topic"，加冒号说明是 JS 表达式
             -->
-            <TopicCard :topic="topic" />
+            <TopicCard :topic="topic" :subject="activeSubject" />
           </div>
         </section>
       </template>
@@ -121,14 +130,14 @@
    原来三个文件分离，现在一个 .vue 文件自己包含所有。
    ================================================================ */
 
-import { ref, computed, onMounted, onActivated, onDeactivated, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onActivated, onDeactivated, nextTick } from 'vue'
 
 // 显式声明组件名，确保 keep-alive 的 include 匹配能正确识别
 defineOptions({ name: 'SyllabusView' })
 
 // --- 导入 API 函数（在 .ts 文件里定义的） ---
 import { getGroupedSyllabus } from '@/api/syllabus'
-import type { GroupedTopics } from '@/types'
+import type { GroupedTopics, Subject } from '@/types'
 
 // --- 导入子组件，本页面由这些组件拼装而成 ---
 import TocSidebar from '@/components/TocSidebar.vue'
@@ -139,10 +148,13 @@ import EmptyState from '@/components/EmptyState.vue'
 import { useMathJax } from '@/composables/useMathJax'
 const { renderMath } = useMathJax()
 
-// ref 创建响应式数据：Vue 会追踪它的变化，变了就自动更新页面
+// ===== ref 创建响应式数据 =====
 const grouped = ref<GroupedTopics | null>(null)
 const loading = ref(false)
 const error = ref('')
+
+// 当前选中的学科（默认 physics），与 TocSidebar 双向绑定
+const activeSubject = ref<Subject>('physics')
 
 // 筛选状态：是否只显示有题目的 topic
 const hasQuestionsOnly = ref(false)
@@ -153,19 +165,33 @@ const topicCountWithQuestions = computed(() => {
   return Object.values(grouped.value).reduce((sum, topics) => sum + topics.length, 0)
 })
 
-// 当筛选开关切换时，重新加载数据
-async function onFilterChange() {
+/** 统一的 syllabus 数据加载函数 */
+async function loadSyllabus(subject: Subject) {
   loading.value = true
+  error.value = ''
   try {
-    const data = await getGroupedSyllabus(hasQuestionsOnly.value)
+    const data = await getGroupedSyllabus(subject, hasQuestionsOnly.value)
     grouped.value = data
     await renderMath()
   } catch (e: any) {
     error.value = e.message || '加载 Syllabus 失败'
+    grouped.value = null
   } finally {
     loading.value = false
   }
 }
+
+// 当筛选开关切换时，重新加载数据
+async function onFilterChange() {
+  await loadSyllabus(activeSubject.value)
+}
+
+// 监听学科切换，自动重载数据
+watch(activeSubject, async (newSubject) => {
+  // 滚动到页面顶部
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  await loadSyllabus(newSubject)
+})
 
 /**
  * onMounted — Vue 的生命周期钩子
@@ -177,22 +203,8 @@ async function onFilterChange() {
  * 这里放"页面一打开就需要做的事情"——即获取数据。
  */
 onMounted(async () => {
-  loading.value = true
-  try {
-    // await getGroupedSyllabus() → 等 API 返回数据
-    // 原来 Flask 在路由函数里查数据库 → render_template 直接塞数据
-    // Vue 方式：组件自己调 API 拿数据
-    const data = await getGroupedSyllabus()
-    grouped.value = data
-
-    // 数据加载完后让 MathJax 重新渲染页面中的 LaTeX 公式
-    // 因为公式内容是异步加载的，MathJax 不会自动感知到 DOM 变化
-    await renderMath()
-  } catch (e: any) {
-    error.value = e.message || '加载 Syllabus 失败'
-  } finally {
-    loading.value = false
-  }
+  // 首次加载默认学科（physics）的数据
+  await loadSyllabus(activeSubject.value)
 })
 
 /* ================================================================

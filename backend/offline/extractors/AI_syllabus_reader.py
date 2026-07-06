@@ -32,9 +32,9 @@ def process_syllabus_with_ai(pdf_path):
 
     Your task is to extract the syllabus specification guidelines.
     Throughout the document, there are sub-chapters with IDs like M1.1, M1.2, M2.1, etc. or any similar titles.
-    Under each ID, there is a title (e.g., "Units") and a list of objectives (e.g., "a. Know and understand...").
+    Each id has a chapter name (e.g., "M1.Units") and a list of objectives (e.g., "a. Know and understand...").
 
-    Please extract EVERY sub-chapter ID, its Title, and its Objectives.
+    Please extract EVERY sub-chapter ID, its Chapter Name, and its Objectives.
 
     CRITICAL INSTRUCTIONS:
     1. If there are math equations, symbols, or variables, convert them into standard LaTeX format (e.g., $E=mc^2$).
@@ -43,7 +43,7 @@ def process_syllabus_with_ai(pdf_path):
     [
         {
             "id": "M1.1",
-            "title": "Units",
+            "chapter": "M1.Units",
             "objectives": "a: Know and understand units... 
                             b: Know that units..."
         }

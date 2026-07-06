@@ -32,7 +32,7 @@
             <el-tag type="primary" size="small" effect="dark">
               {{ detail.topic.topic_id }}
             </el-tag>
-            <h1 class="topic-title">{{ detail.topic.title }}</h1>
+            <h1 class="topic-title">{{ topicTitle }}</h1>
           </div>
 
           <!--
@@ -104,18 +104,27 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { getTopicDetail } from '@/api/topic'
-import type { TopicDetailData } from '@/types'
+import type { TopicDetailData, Subject } from '@/types'
 import QuestionCard from '@/components/QuestionCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { useMathJax } from '@/composables/useMathJax'
 const { renderMath } = useMathJax()
 
-// topicId 由路由传到 props（见 router/index.ts 中 props: true）
-const props = defineProps<{ topicId: string }>()
+// topicId 和 subject 由路由传到 props（见 router/index.ts 中 props: true）
+const props = defineProps<{ subject: Subject; topicId: string }>()
 
 const loading = ref(true)
 const error = ref('')
 const detail = ref<TopicDetailData | null>(null)
+
+/** 兼容 physics/math 的标题显示 */
+const topicTitle = computed(() => {
+  if (!detail.value) return ''
+  const t = detail.value.topic
+  if ('title' in t && t.title) return t.title
+  if ('chapter' in t && t.chapter) return t.chapter
+  return t.topic_id
+})
 
 /** 把 objectives 按 \n 拆成数组，和 TopicCard.vue 一样 */
 const objectivesList = computed(() => {
@@ -137,7 +146,7 @@ const totalCount = computed(() => {
 
 onMounted(async () => {
   try {
-    const data = await getTopicDetail(props.topicId)
+    const data = await getTopicDetail(props.subject, props.topicId)
     detail.value = data
     loading.value = false  // 先关闭骨架屏，让内容显示到 DOM 中
 

@@ -53,7 +53,8 @@ print(f"SQLite syllabus 表: {sqlite_rows} 条记录")
 rows = sqlite_conn.execute("SELECT * FROM syllabus").fetchall()
 for r in rows:
     mysql_cursor.execute(
-        "INSERT IGNORE INTO syllabus (topic_id, title, objectives) VALUES (%s, %s, %s)",
+        "INSERT INTO syllabus (topic_id, title, objectives) VALUES (%s, %s, %s) "
+        "ON CONFLICT DO UPDATE SET title = EXCLUDED.title, objectives = EXCLUDED.objectives",
         (r["topic_id"], r["title"], r["objectives"])
     )
 mysql_conn.commit()

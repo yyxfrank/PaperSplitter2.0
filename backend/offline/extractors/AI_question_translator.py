@@ -79,7 +79,7 @@ def process_and_classify_exam(pdf_path, syllabus_path):
 # Run it
 # ==========================================
 if __name__ == "__main__":
-    pdf_path = r"d:\Python Projects\PaperSplitter2.0\ExperiData\ENGAA_2017_S1_QuestionPaper.pdf"
+    pdf_path = r"d:\Python Projects\PaperSplitter2.0\ExperiData\ENGAA_2016_S1_QuestionPaper.pdf"
     syllabus_path = "structured_syllabus_math_1.json"  # Point this to your syllabus file
     output_json_path = "classified_questions_math_1.json"
 

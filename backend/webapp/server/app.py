@@ -12,6 +12,11 @@ from database.database import (
     get_topic,
     get_questions_by_topic,
     search_topics,
+    # 旧版兼容函数
+    get_all_topics_grouped_old,
+    get_topic_old,
+    get_questions_by_topic_old,
+    search_topics_old,
     IMAGE_BASE_DIR,
 )
 
@@ -22,39 +27,31 @@ app = Flask(
 )
 
 # 允许来自任何来源的跨域请求（开发阶段用）
-# Vue 开发服务器在 5173 端口，Flask 在 5000 端口，端口不同浏览器会拦截
 CORS(app)
 
 
 # ================================================================
 # 原有路由（保留不动）—— 给原生的 Jinja2 页面用
-# Vue 页面上线前，这些路由继续提供完整功能
 # ================================================================
 
-# ----------------------------------------------------------------
-# Home — Syllabus page with clickable table of contents
-# ----------------------------------------------------------------
 @app.route("/")
 def syllabus():
-    grouped = get_all_topics_grouped()
-    flat = get_all_topics()
+    grouped = get_all_topics_grouped_old()
+    flat = None  # old templates don't use flat
 
-    if grouped is None or flat is None:
+    if grouped is None:
         return render_template("index.html", grouped=None, topics=None)
 
     return render_template("index.html", grouped=grouped, topics=flat)
 
 
-# ----------------------------------------------------------------
-# Topic detail — show all questions for a given topic
-# ----------------------------------------------------------------
 @app.route("/topic/<topic_id>")
 def topic_detail(topic_id):
-    topic = get_topic(topic_id)
+    topic = get_topic_old(topic_id)
     if topic is None:
         abort(404, description=f"Topic '{topic_id}' not found.")
 
-    questions = get_questions_by_topic(topic_id)
+    questions = get_questions_by_topic_old(topic_id)
     if questions is None:
         questions = []
 
@@ -73,9 +70,6 @@ def topic_detail(topic_id):
     )
 
 
-# ----------------------------------------------------------------
-# Serve question images from the output_questions directory
-# ----------------------------------------------------------------
 @app.route("/question_images/<path:filename>")
 def question_images(filename):
     if not os.path.exists(IMAGE_BASE_DIR):
@@ -88,7 +82,7 @@ def search():
     keyword = request.args.get("q", "").strip()
     topics = None
     if keyword:
-        topics = search_topics(keyword)
+        topics = search_topics_old(keyword)
     return render_template("search.html", topics=topics, keyword=keyword)
 
 
@@ -98,47 +92,59 @@ def not_found(error):
 
 
 # ================================================================
-# 新增 JSON API 路由 —— 给 Vue 前端调用的接口
-#
-# 与原路由的区别：
-#   原路由 → render_template() → 返回 HTML 页面
-#   JSON 路由 → jsonify() → 返回纯 JSON 数据（没有 HTML）
-#
-# 共同点：都调同一个 database.py，数据源一致
+# JSON API 路由 —— 给 Vue 前端调用的接口
+# 所有新 API 都以 /api/subject/<subject>/ 开头，
+# <subject> 取值为 physics 或 math
 # ================================================================
 
-@app.route("/api/topics")
-def api_topics():
-    """获取所有 syllabus 主题（扁平列表）"""
+def _validate_subject(subject):
+    """校验学科参数，返回 (是否合法, 错误响应)"""
+    if subject not in ("physics", "math"):
+        return False, jsonify({"code": 1, "message": f"Invalid subject: {subject}", "data": None})
+    return True, None
+
+
+@app.route("/api/subject/<subject>/topics")
+def api_topics(subject):
+    """获取指定学科的所有 syllabus 主题（扁平列表）"""
+    valid, err = _validate_subject(subject)
+    if not valid:
+        return err
     has_questions = request.args.get("has_questions", "").lower() in ("1", "true")
-    topics = get_all_topics(has_questions_only=has_questions)
+    topics = get_all_topics(subject, has_questions_only=has_questions)
     if topics is None:
         return jsonify({"code": 1, "message": "数据库连接失败", "data": None})
     return jsonify({"code": 0, "data": topics})
 
 
-@app.route("/api/topics/grouped")
-def api_topics_grouped():
-    """获取按前缀分组后的 syllabus"""
+@app.route("/api/subject/<subject>/topics/grouped")
+def api_topics_grouped(subject):
+    """获取指定学科按前缀分组后的 syllabus"""
+    valid, err = _validate_subject(subject)
+    if not valid:
+        return err
     has_questions = request.args.get("has_questions", "").lower() in ("1", "true")
-    grouped = get_all_topics_grouped(has_questions_only=has_questions)
+    grouped = get_all_topics_grouped(subject, has_questions_only=has_questions)
     if grouped is None:
         return jsonify({"code": 1, "message": "数据库连接失败", "data": None})
     return jsonify({"code": 0, "data": grouped})
 
 
-@app.route("/api/topics/<topic_id>")
-def api_topic_detail(topic_id):
-    """获取某个 topic 的详细信息 + 所有题目"""
-    topic = get_topic(topic_id)
+@app.route("/api/subject/<subject>/topics/<topic_id>")
+def api_topic_detail(subject, topic_id):
+    """获取指定学科某个 topic 的详细信息 + 所有题目"""
+    valid, err = _validate_subject(subject)
+    if not valid:
+        return err
+    topic = get_topic(subject, topic_id)
     if topic is None:
         return jsonify({
             "code": 1,
-            "message": f"Topic '{topic_id}' not found",
+            "message": f"Topic '{topic_id}' not found in {subject}",
             "data": None
         }), 404
 
-    questions = get_questions_by_topic(topic_id) or []
+    questions = get_questions_by_topic(subject, topic_id) or []
 
     # 按试卷名分组
     questions_by_paper = {}
@@ -158,14 +164,17 @@ def api_topic_detail(topic_id):
     })
 
 
-@app.route("/api/search")
-def api_search():
-    """按关键词搜索章节"""
+@app.route("/api/subject/<subject>/search")
+def api_search(subject):
+    """按关键词在指定学科的 syllabus 中搜索"""
+    valid, err = _validate_subject(subject)
+    if not valid:
+        return err
     keyword = request.args.get("q", "").strip()
     if not keyword:
         return jsonify({"code": 0, "data": []})
 
-    topics = search_topics(keyword)
+    topics = search_topics(subject, keyword)
     if topics is None:
         return jsonify({"code": 1, "message": "数据库连接失败", "data": None})
 

@@ -90,6 +90,7 @@
               v-for="topic in results"
               :key="topic.topic_id"
               :topic="topic"
+              :subject="currentSubject"
             />
           </div>
         </template>
@@ -142,7 +143,7 @@ import { useMathJax } from '@/composables/useMathJax'
 // 导入 MathJax 组合式函数
 // 因为搜索结果的 objectives 可能包含 LaTeX 公式
 
-import type { Topic } from '@/types'
+import type { Topic, Subject } from '@/types'
 // 导入类型约束（仅开发阶段用，编译后不存在）
 
 // ---------- 响应式数据 ----------
@@ -160,6 +161,9 @@ import type { Topic } from '@/types'
 
 // 当前搜索关键词，从 URL 参数读取
 const keyword = ref('')
+
+// 当前搜索学科，从 URL 参数读取（默认 physics）
+const currentSubject = ref<Subject>('physics')
 
 // 搜索结果数组
 const results = ref<Topic[]>([])
@@ -194,12 +198,19 @@ onMounted(async () => {
     // 这里 as string 是 TypeScript 类型断言："告诉 TS 这肯定是字符串"
     keyword.value = (route.query.q as string) || ''
 
+    // route.query.subject — 读取 URL 参数 ?subject=math
+    // 默认为 physics
+    const subjectParam = route.query.subject as string | undefined
+    if (subjectParam === 'math' || subjectParam === 'physics') {
+      currentSubject.value = subjectParam
+    }
+
     // 没输入关键词就不调用 API
     if (!keyword.value) return
 
-    // 调 API 拿搜索结果
+    // 调 API 拿搜索结果（按学科搜索对应的 syllabus 表）
     // await — 等待异步操作完成（等后端返回数据）
-    results.value = await searchTopics(keyword.value)
+    results.value = await searchTopics(keyword.value, currentSubject.value)
 
     // 数据加载完成后重新渲染 MathJax 公式
     // 因为 objectives 里可能有 LaTeX

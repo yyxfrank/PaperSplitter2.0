@@ -6,13 +6,27 @@
  * 传错类型 IDE 会直接报红，不用等运行才发现 bug。
  * ============================================================== */
 
-/** syllabus 表 的一条记录 */
-export interface Topic {
+/** 学科类型：physics 或 math */
+export type Subject = 'physics' | 'math'
+
+/** syllabus_physics 表 的一条记录（有 title） */
+export interface PhysicsTopic {
   topic_id: string       // 如 "P1.1"
   title: string          // 章节标题
   objectives: string     // 学习目标（可能含 HTML）
   paper_name: string | null  // 所属试卷
 }
+
+/** syllabus_math 表 的一条记录（无 title，有 chapter） */
+export interface MathTopic {
+  topic_id: string       // 如 "M1.1"
+  chapter: string        // 章节名称，如 "M1"
+  objectives: string     // 学习目标（可能含 HTML）
+  paper_name: string | null  // 所属试卷
+}
+
+/** 联合类型：一个 topic 可能是 physics 或 math */
+export type Topic = PhysicsTopic | MathTopic
 
 /** questions 表 的一条记录 */
 export interface Question {

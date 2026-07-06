@@ -19,11 +19,11 @@ const router = createRouter({
       component: () => import('@/views/SyllabusView.vue')
     },
     {
-      path: '/topic/:topicId',
+      path: '/topic/:subject/:topicId',
       name: 'topic-detail',
       component: () => import('@/views/topic/TopicDetail.vue'),
-      // props: true → 把 URL 参数 :topicId 作为 props 传给组件
-      // 组件里直接 defineProps(['topicId']) 就能拿到
+      // props: true → 把 URL 参数 :subject 和 :topicId 作为 props 传给组件
+      // 组件里 defineProps(['subject', 'topicId']) 就能拿到
       props: true
     },
     {
