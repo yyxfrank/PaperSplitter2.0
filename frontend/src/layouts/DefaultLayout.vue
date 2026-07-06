@@ -17,7 +17,16 @@
     <AppTopNav />
 
     <main class="main-content">
-      <router-view />
+      <!--
+        keep-alive 缓存路由组件
+        include="syllabus" → 只缓存 SyllabusView，TopicDetail 不缓存（每次重新获取数据）
+        效果：离开 SyllabusView 时"冻结"状态，回来时"解冻"，filter/滚动位置都保留
+      -->
+      <router-view v-slot="{ Component }">
+        <keep-alive :include="['SyllabusView']">
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </main>
 
     <!-- 全局 Lightbox（题目图片放大，详情页会用） -->

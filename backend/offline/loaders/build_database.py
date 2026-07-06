@@ -132,9 +132,9 @@ def append_to_database(paper_name, syllabus_json, classified_json, image_folder,
 # 运行数据库写入器
 # ==========================================
 if __name__ == "__main__":
-    PAPER_IDENTIFIER = "ENGAA_2016_S1"
-    SYLLABUS_FILE = "structured_syllabus_physics.json"
-    CLASSIFIED_FILE = "classified_questions_physics.json"
+    PAPER_IDENTIFIER = "ENGAA_2017_S1"
+    SYLLABUS_FILE = "structured_syllabus_math_1.json"
+    CLASSIFIED_FILE = "classified_questions_math_1.json"
     IMAGE_DIR = "output_questions"
 
     append_to_database(PAPER_IDENTIFIER, SYLLABUS_FILE, CLASSIFIED_FILE, IMAGE_DIR)

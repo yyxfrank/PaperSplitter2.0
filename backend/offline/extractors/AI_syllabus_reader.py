@@ -31,8 +31,8 @@ def process_syllabus_with_ai(pdf_path):
     You are an expert data extraction assistant. I have uploaded the Exam Guide.
 
     Your task is to extract the syllabus specification guidelines.
-    Throughout the document, there are sub-chapters with IDs like P1.1, P1.2, P2.1, etc. or any similar titles.
-    Under each ID, there is a title (e.g., "Electrostatics") and a list of objectives (e.g., "a. Know and understand...").
+    Throughout the document, there are sub-chapters with IDs like M1.1, M1.2, M2.1, etc. or any similar titles.
+    Under each ID, there is a title (e.g., "Units") and a list of objectives (e.g., "a. Know and understand...").
 
     Please extract EVERY sub-chapter ID, its Title, and its Objectives.
 
@@ -42,10 +42,10 @@ def process_syllabus_with_ai(pdf_path):
     3. Use the following JSON format:
     [
         {
-            "id": "P1.1",
-            "title": "Electrostatics",
-            "objectives": "a: Know and understand that insulators... 
-                            b: Know that charging..."
+            "id": "M1.1",
+            "title": "Units",
+            "objectives": "a: Know and understand units... 
+                            b: Know that units..."
         }
     ]
     """
@@ -69,8 +69,8 @@ def process_syllabus_with_ai(pdf_path):
 # Run the Extraction
 # ==========================================
 if __name__ == "__main__":
-    pdf_path = r"d:\Python Projects\PaperSplitter2.0\ExperiData\ESAT_Guide_Physics_June2025.pdf"
-    output_json_path = "structured_syllabus_physics.json"
+    pdf_path = r"d:\Python Projects\PaperSplitter2.0\ExperiData\ESAT_Guide_Mathematics_1_June2025.pdf"
+    output_json_path = "structured_syllabus_math_1.json"
 
     try:
         # Extract the data

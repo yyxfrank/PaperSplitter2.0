@@ -110,7 +110,8 @@ def not_found(error):
 @app.route("/api/topics")
 def api_topics():
     """获取所有 syllabus 主题（扁平列表）"""
-    topics = get_all_topics()
+    has_questions = request.args.get("has_questions", "").lower() in ("1", "true")
+    topics = get_all_topics(has_questions_only=has_questions)
     if topics is None:
         return jsonify({"code": 1, "message": "数据库连接失败", "data": None})
     return jsonify({"code": 0, "data": topics})
@@ -119,7 +120,8 @@ def api_topics():
 @app.route("/api/topics/grouped")
 def api_topics_grouped():
     """获取按前缀分组后的 syllabus"""
-    grouped = get_all_topics_grouped()
+    has_questions = request.args.get("has_questions", "").lower() in ("1", "true")
+    grouped = get_all_topics_grouped(has_questions_only=has_questions)
     if grouped is None:
         return jsonify({"code": 1, "message": "数据库连接失败", "data": None})
     return jsonify({"code": 0, "data": grouped})

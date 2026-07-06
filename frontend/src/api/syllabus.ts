@@ -9,11 +9,13 @@ import request from './request'
 import type { Topic, GroupedTopics } from '@/types'
 
 /** 获取所有 syllabus 主题（扁平列表） */
-export function getSyllabus(): Promise<Topic[]> {
-  return request.get('/topics')
+export function getSyllabus(hasQuestions?: boolean): Promise<Topic[]> {
+  const params = hasQuestions ? { has_questions: '1' } : undefined
+  return request.get('/topics', { params })
 }
 
 /** 获取按前缀分组后的 syllabus */
-export function getGroupedSyllabus(): Promise<GroupedTopics> {
-  return request.get('/topics/grouped')
+export function getGroupedSyllabus(hasQuestions?: boolean): Promise<GroupedTopics> {
+  const params = hasQuestions ? { has_questions: '1' } : undefined
+  return request.get('/topics/grouped', { params })
 }

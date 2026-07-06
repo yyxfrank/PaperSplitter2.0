@@ -21,7 +21,23 @@
       ===== 右侧：主内容区 =====
     -->
     <div class="syllabus-content">
-      <h1 class="page-title">Syllabus</h1>
+      <div class="page-header">
+        <h1 class="page-title">Syllabus</h1>
+
+        <!-- 筛选开关 -->
+        <div class="filter-bar">
+          <el-switch
+            v-model="hasQuestionsOnly"
+            size="small"
+            active-color="#2d6a9f"
+            @change="onFilterChange"
+          />
+          <span class="filter-label">Contain Questions Only</span>
+          <el-tag v-if="hasQuestionsOnly" size="small" type="warning" effect="plain" class="filter-tag">
+            {{ topicCountWithQuestions }} topics
+          </el-tag>
+        </div>
+      </div>
 
       <!--
         ===== 场景 1：无数据库（grouped === null） =====
@@ -105,7 +121,10 @@
    原来三个文件分离，现在一个 .vue 文件自己包含所有。
    ================================================================ */
 
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated, onDeactivated, nextTick } from 'vue'
+
+// 显式声明组件名，确保 keep-alive 的 include 匹配能正确识别
+defineOptions({ name: 'SyllabusView' })
 
 // --- 导入 API 函数（在 .ts 文件里定义的） ---
 import { getGroupedSyllabus } from '@/api/syllabus'
@@ -124,6 +143,29 @@ const { renderMath } = useMathJax()
 const grouped = ref<GroupedTopics | null>(null)
 const loading = ref(false)
 const error = ref('')
+
+// 筛选状态：是否只显示有题目的 topic
+const hasQuestionsOnly = ref(false)
+
+// 有题目的 topic 总数（用于筛选标签上的计数）
+const topicCountWithQuestions = computed(() => {
+  if (!grouped.value) return 0
+  return Object.values(grouped.value).reduce((sum, topics) => sum + topics.length, 0)
+})
+
+// 当筛选开关切换时，重新加载数据
+async function onFilterChange() {
+  loading.value = true
+  try {
+    const data = await getGroupedSyllabus(hasQuestionsOnly.value)
+    grouped.value = data
+    await renderMath()
+  } catch (e: any) {
+    error.value = e.message || '加载 Syllabus 失败'
+  } finally {
+    loading.value = false
+  }
+}
 
 /**
  * onMounted — Vue 的生命周期钩子
@@ -151,6 +193,38 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+})
+
+/* ================================================================
+   keep-alive 生命周期适配
+
+   父级 DefaultLayout.vue 已用 <keep-alive :include="['syllabus']">
+   将本组件包裹。这意味着：
+
+   1. 离开页面时组件不会被销毁，所有 ref 状态（hasQuestionsOnly、
+      grouped 等）自动保留，不重置。
+   2. onMounted 只在首次进入时执行一次，再次进入不会重复调用。
+   3. 再次激活时触发 onActivated，需要在这里恢复滚动位置并
+      重新触发 MathJax 渲染（因为 DOM 可能被重建）。
+   ================================================================ */
+
+// 保存离开时的滚动位置
+const savedScrollTop = ref(0)
+
+onDeactivated(() => {
+  // 用户离开页面（点面包屑跳转）时，记录当前滚动位置
+  savedScrollTop.value = window.scrollY
+})
+
+onActivated(async () => {
+  // 用户回到本页面时：
+  // 1. 恢复之前的滚动位置
+  await nextTick()
+  window.scrollTo(0, savedScrollTop.value)
+
+  // 2. 重新触发 MathJax 渲染，确保公式正确显示
+  //    因为 keep-alive 缓存了 DOM，但 MathJax 可能未扫描到变化
+  await renderMath()
 })
 </script>
 
@@ -180,11 +254,37 @@ onMounted(async () => {
   min-width: 0;
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .page-title {
   font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 2rem;
+  margin: 0;
   color: #1a1a2e;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  color: #555;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-tag {
+  font-weight: 600;
 }
 
 .chapter-section {

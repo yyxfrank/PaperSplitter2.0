@@ -49,16 +49,28 @@ def get_db_connection():
         return None
 
 
-def get_all_topics():
-    """返回所有 syllabus 主题，按 topic_id 排序。"""
+def get_all_topics(has_questions_only=False):
+    """返回所有 syllabus 主题，按 topic_id 排序。
+
+    Args:
+        has_questions_only: 为 True 时只返回有题目的 topic（INNER JOIN questions 表）。
+    """
     conn = get_db_connection()
     if conn is None:
         return None
     try:
-        # 注意：MySQL 占位符用 %s（SQLite 用 ?）
         # dictionary=True 使 cursor 返回字典行（等价于 SQLite 的 row_factory = sqlite3.Row）
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM syllabus ORDER BY topic_id")
+        if has_questions_only:
+            # INNER JOIN = 只返回 questions 表中存在的 topic_id
+            # DISTINCT 防止同一个 topic 有多道题时重复
+            cursor.execute("""
+                SELECT DISTINCT s.* FROM syllabus s
+                INNER JOIN questions q ON s.topic_id = q.topic_id
+                ORDER BY s.topic_id
+            """)
+        else:
+            cursor.execute("SELECT * FROM syllabus ORDER BY topic_id")
         topics = cursor.fetchall()
         return topics
     finally:
@@ -123,9 +135,13 @@ def get_all_papers():
         conn.close()
 
 
-def get_all_topics_grouped():
-    """返回按父章节分组的话题（如 P1, P2, M1...）。"""
-    topics = get_all_topics()
+def get_all_topics_grouped(has_questions_only=False):
+    """返回按父章节分组的话题（如 P1, P2, M1...）。
+
+    Args:
+        has_questions_only: 为 True 时只保留有题目的 topic。
+    """
+    topics = get_all_topics(has_questions_only)
     if topics is None:
         return None
 

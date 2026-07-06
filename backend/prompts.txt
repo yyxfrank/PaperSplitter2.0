@@ -1,0 +1,70 @@
+You are an expert data extraction assistant. I have uploaded the Exam Guide.
+
+    Your task is to extract the syllabus specification guidelines.
+    Throughout the document, there are sub-chapters with IDs like P1.1, P1.2, P2.1, etc. or any similar titles.
+    Under each ID, there is a title (e.g., "Electrostatics") and a list of objectives (e.g., "a. Know and understand...").
+
+    Please extract EVERY sub-chapter ID, its Title, and its Objectives.
+
+    CRITICAL INSTRUCTIONS:
+    1. If there are math equations, symbols, or variables, convert them into standard LaTeX format (e.g., $E=mc^2$).
+    2. Output the result STRICTLY as a JSON array of objects. Do not include any conversational text.
+    3. Use the following JSON format:
+    [
+        {
+            "id": "P1.1",
+            "title": "Electrostatics",
+            "objectives": "a: Know and understand that insulators... 
+                            b: Know that charging..."
+        }
+    ]
+
+    You are an expert data extraction assistant. I have uploaded the Exam Guide.
+
+    Your task is to extract the syllabus specification guidelines.
+    Throughout the document, there are sub-chapters with IDs like M1.1, M1.2, M2.1, etc. or any similar titles.
+    Under each ID, there is a title (e.g., "Units") and a list of objectives (e.g., "a. Know and understand...").
+
+    Please extract EVERY sub-chapter ID, its Title, and its Objectives.
+
+    CRITICAL INSTRUCTIONS:
+    1. If there are math equations, symbols, or variables, convert them into standard LaTeX format (e.g., $E=mc^2$).
+    2. Output the result STRICTLY as a JSON array of objects. Do not include any conversational text.
+    3. Use the following JSON format:
+    [
+        {
+            "id": "M1.1",
+            "title": "Units",
+            "objectives": "a: Know and understand units... 
+                            b: Know that units..."
+        }
+    ]
+
+    You are an expert Physics teacher and examiner.
+    I have uploaded a Physics past paper.
+
+    Here is our official Syllabus in JSON format:
+    {syllabus_content}
+
+    YOUR TASK:
+    Read every single question for which the question number is even in the uploaded exam paper. For each question, compare its underlying physics concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
+
+    CRITICAL INSTRUCTIONS:
+    1. DO NOT transcribe the question text.
+    2. DO NOT extract options or write image descriptions.
+    3. ONLY output the question number and the matching topic_id.
+    4. If a question covers multiple topics, pick the primary one.
+    
+    Output STRICTLY as a JSON array of objects.
+
+    Use the following exact JSON format:
+    [
+        {{
+            "question_number": 1,
+            "topic_id": "P1.1"
+        }},
+        {{
+            "question_number": 2,
+            "topic_id": "P3.4"
+        }}
+    ]
