@@ -38,29 +38,20 @@
       </button>
     </div>
 
-    <!--
-      v-if / v-else：Vue 的条件渲染
-      对比原来 Jinja2：{% if grouped %} ... {% else %} ... {% endif %}
-    -->
     <template v-if="grouped && Object.keys(grouped).length">
-      <nav class="toc-nav">
-        <!--
-          v-for 遍历对象：v-for="(value, key) in object"
-          grouped 是 { 'P': [...], 'S': [...], ... } 或 { 'M1': [...], 'M2': [...] }
-          Object.entries() 把对象转成可遍历的数组
-        -->
-        <div
+      <el-collapse v-model="openChapters" class="toc-collapse">
+        <el-collapse-item
           v-for="[prefix, topics] of Object.entries(grouped)"
           :key="prefix"
+          :name="prefix"
           class="toc-chapter-group"
         >
-          <h3 class="toc-chapter-heading">Chapter {{ prefix }}</h3>
+          <template #title>
+            <span class="toc-chapter-heading">Chapter {{ prefix }}</span>
+            <span class="toc-count">({{ topics.length }})</span>
+          </template>
           <ul class="toc-list">
             <li v-for="topic in topics" :key="topic.topic_id">
-              <!--
-                @click.prevent 替代 e.preventDefault()
-                原因见下方 handleTocClick
-              -->
               <a
                 :href="`#${topic.topic_id}`"
                 class="toc-link"
@@ -72,8 +63,8 @@
               </a>
             </li>
           </ul>
-        </div>
-      </nav>
+        </el-collapse-item>
+      </el-collapse>
     </template>
 
     <p v-else class="empty-hint">No syllabus data found.</p>
@@ -81,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import type { GroupedTopics, Topic, Subject } from '@/types'
 
 const props = defineProps<{
@@ -95,6 +86,15 @@ defineEmits<{
 
 // 当前高亮的 topic_id
 const activeId = ref('')
+
+// 折叠面板：默认展开所有章节
+const openChapters = ref<string[]>([])
+
+watch(() => props.grouped, (val) => {
+  if (val) {
+    openChapters.value = Object.keys(val)
+  }
+}, { immediate: true })
 
 /** 兼容显示 topic 名称：physics 有 title，math 用 chapter 作为 fallback */
 function topicLabel(topic: Topic): string {
@@ -191,8 +191,29 @@ onUnmounted(() => {
   border-bottom: 2px solid #e8e8f0;
 }
 
+.toc-collapse {
+  border: none;
+}
+/* 覆盖 el-collapse-item 默认边框 */
+.toc-collapse :deep(.el-collapse-item__header) {
+  border: none;
+  height: auto;
+  padding: 0.5rem 0;
+  font-weight: 600;
+}
+.toc-collapse :deep(.el-collapse-item__wrap) {
+  border: none;
+}
+.toc-collapse :deep(.el-collapse-item__content) {
+  padding: 0;
+}
+/* 去掉 el-collapse-item 的默认箭头图标 */
+.toc-collapse :deep(.el-collapse-item__arrow) {
+  color: #9ca3af;
+}
+
 .toc-chapter-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0;
 }
 
 .toc-chapter-heading {
@@ -201,7 +222,15 @@ onUnmounted(() => {
   color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
+}
+
+.toc-count {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .toc-list {
