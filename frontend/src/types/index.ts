@@ -9,9 +9,10 @@
 /** 学科类型：physics 或 math */
 export type Subject = 'physics' | 'math'
 
-/** syllabus_physics 表 的一条记录（有 title） */
+/** syllabus_physics 表 的一条记录（有 title 和 chapter） */
 export interface PhysicsTopic {
   topic_id: string       // 如 "P1.1"
+  chapter: string        // 章节名称，如 "P1", "P2", "S1"
   title: string          // 章节标题
   objectives: string     // 学习目标（可能含 HTML）
   paper_name: string | null  // 所属试卷

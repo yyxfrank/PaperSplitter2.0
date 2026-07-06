@@ -99,8 +99,7 @@ const activeId = ref('')
 /** 兼容显示 topic 名称：physics 有 title，math 用 chapter 作为 fallback */
 function topicLabel(topic: Topic): string {
   if ('title' in topic && topic.title) return topic.title
-  if ('chapter' in topic && topic.chapter) return topic.chapter
-  return topic.topic_id
+  return ""
 }
 
 /* ================================================================

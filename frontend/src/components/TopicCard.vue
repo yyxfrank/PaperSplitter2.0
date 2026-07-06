@@ -69,8 +69,7 @@ const props = defineProps<{
  */
 const displayTitle = computed(() => {
   if ('title' in props.topic && props.topic.title) return props.topic.title
-  if ('chapter' in props.topic && props.topic.chapter) return props.topic.chapter
-  return props.topic.topic_id
+  return ""
 })
 
 /**

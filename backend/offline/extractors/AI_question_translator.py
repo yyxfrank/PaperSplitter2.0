@@ -31,14 +31,14 @@ def process_and_classify_exam(pdf_path, syllabus_path):
 
     # 3. The Ultra-Fast Classification Prompt
     prompt = f"""
-    You are an expert Mathematics teacher and examiner.
-    I have uploaded a Mathematics past paper.
+   You are an expert Physics teacher and examiner.
+    I have uploaded a Physics past paper.
 
     Here is our official Syllabus in JSON format:
     {syllabus_content}
 
     YOUR TASK:
-    Read every single question for which the question number is odd in the uploaded exam paper. For each question, compare its underlying math concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
+    Read every single question for which the question number is even in the uploaded exam paper. For each question, compare its underlying physics concepts to the Syllabus, and assign the single best Sub-Chapter ID (topic_id).
 
     CRITICAL INSTRUCTIONS:
     1. DO NOT transcribe the question text.
@@ -52,11 +52,11 @@ def process_and_classify_exam(pdf_path, syllabus_path):
     [
         {{
             "question_number": 1,
-            "topic_id": "M1.1"
+            "topic_id": "P1.1"
         }},
         {{
-            "question_number": 3,
-            "topic_id": "M3.4"
+            "question_number": 2,
+            "topic_id": "P3.4"
         }}
     ]
     """
@@ -79,9 +79,9 @@ def process_and_classify_exam(pdf_path, syllabus_path):
 # Run it
 # ==========================================
 if __name__ == "__main__":
-    pdf_path = r"d:\Python Projects\PaperSplitter2.0\ExperiData\ENGAA_2016_S1_QuestionPaper.pdf"
-    syllabus_path = "structured_syllabus_math_1.json"  # Point this to your syllabus file
-    output_json_path = "classified_questions_math_1.json"
+    pdf_path = r"d:\Python Projects\PaperSplitter2.0\ExperiData\ENGAA_2023_S1_QuestionPaper.pdf"
+    syllabus_path = "structured_syllabus_physics.json"  # Point this to your syllabus file
+    output_json_path = "classified_questions_physics.json"
 
     try:
         json_data = process_and_classify_exam(pdf_path, syllabus_path)

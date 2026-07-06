@@ -167,8 +167,7 @@ def get_questions_by_topic(subject: str, topic_id):
 def get_all_topics_grouped(subject: str, has_questions_only=False):
     """返回按父章节分组的话题（如 P1, P2, M1...）。
 
-    对于 physics，分组前缀由 topic_id 提取（如 "P1.1" → "P1"）。
-    对于 math，直接使用 chapter 字段作为分组键。
+    现在 physics 和 math 都使用 chapter 字段作为分组键。
     """
     topics = get_all_topics(subject, has_questions_only)
     if topics is None:
@@ -176,13 +175,8 @@ def get_all_topics_grouped(subject: str, has_questions_only=False):
 
     grouped = {}
     for topic in topics:
-        if subject == "math":
-            # math 使用 chapter 字段分组
-            prefix = topic["chapter"]
-        else:
-            # physics 从 topic_id 提取前缀
-            tid = topic["topic_id"]
-            prefix = ".".join(tid.split(".")[:-1]) if "." in tid else tid
+        # 两个学科都用 chapter 字段分组
+        prefix = topic["chapter"]
         if prefix not in grouped:
             grouped[prefix] = []
         grouped[prefix].append(dict(topic))

@@ -4,7 +4,7 @@
 支持 Physics / Math 分表存储。
 
 表结构：
-  - syllabus_physics: topic_id (PK), title, objectives
+  - syllabus_physics: topic_id (PK), chapter, title, objectives
   - syllabus_math:    topic_id (PK), chapter, objectives
   - questions_physics: id (PK), paper_name, question_number, topic_id (FK→syllabus_physics)
   - questions_math:    id (PK), paper_name, question_number, topic_id (FK→syllabus_math)
@@ -39,10 +39,11 @@ def create_tables(cursor, subject):
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         """)
     else:
-        # Physics syllabus: 有 title 字段
+        # Physics syllabus: 有 title 和 chapter 字段
         cursor.execute(f"""
             CREATE TABLE IF NOT EXISTS {s_tbl} (
                 topic_id    VARCHAR(50)  NOT NULL  COMMENT '主题编号，如 P1.1、S1.2',
+                chapter     VARCHAR(50)  NOT NULL  COMMENT '章节名称，如 P1、P2、S1',
                 title       VARCHAR(500) NOT NULL  COMMENT '主题标题',
                 objectives  TEXT                   COMMENT '学习目标（大段文本）',
                 PRIMARY KEY (topic_id)
@@ -111,7 +112,7 @@ def append_to_database(paper_name, syllabus_json, classified_json, image_folder,
     print("Syncing Syllabus...")
     with open(syllabus_json, 'r', encoding='utf-8') as f:
         syllabus_data = json.load(f)
-        for chapter in syllabus_data:
+        for syllabus in syllabus_data:
             if subject == "math":
                 # Math: 没有 title，有 chapter 字段
                 cursor.execute(f"""
@@ -120,16 +121,17 @@ def append_to_database(paper_name, syllabus_json, classified_json, image_folder,
                     ON DUPLICATE KEY UPDATE
                         chapter = VALUES(chapter),
                         objectives = VALUES(objectives)
-                """, (chapter['id'], chapter['chapter'], chapter['objectives']))
+                """, (syllabus['id'], syllabus['chapter'], syllabus['objectives']))
             else:
-                # Physics: 有 title
+                # Physics: 有 title 和 chapter
                 cursor.execute(f"""
-                    INSERT INTO {s_tbl} (topic_id, title, objectives)
-                    VALUES (%s, %s, %s)
+                    INSERT INTO {s_tbl} (topic_id, chapter, title, objectives)
+                    VALUES (%s, %s, %s, %s)
                     ON DUPLICATE KEY UPDATE
+                        chapter = VALUES(chapter),
                         title = VALUES(title),
                         objectives = VALUES(objectives)
-                """, (chapter['id'], chapter['title'], chapter['objectives']))
+                """, (syllabus['id'], syllabus['chapter'], syllabus['title'], syllabus['objectives']))
 
     # ── 插入新题目 ──────────────────────────────────────────────
     q_tbl = f"questions_{subject}"
@@ -166,9 +168,9 @@ def append_to_database(paper_name, syllabus_json, classified_json, image_folder,
 # 运行数据库写入器
 # ==========================================
 if __name__ == "__main__":
-    PAPER_IDENTIFIER = "ENGAA_2016_S1"
-    SYLLABUS_FILE = "structured_syllabus_math_1.json"
-    CLASSIFIED_FILE = "classified_questions_math_1.json"
+    PAPER_IDENTIFIER = "ENGAA_2023_S1"
+    SYLLABUS_FILE = "structured_syllabus_physics.json"
+    CLASSIFIED_FILE = "classified_questions_physics.json"
     IMAGE_DIR = "output_questions"
 
     append_to_database(
@@ -176,5 +178,5 @@ if __name__ == "__main__":
         SYLLABUS_FILE,
         CLASSIFIED_FILE,
         IMAGE_DIR,
-        subject="math"  # 指定为 math 学科
+        subject="physics"  # 指定为 math 学科
     )
