@@ -6,8 +6,8 @@
 表结构：
   - syllabus_physics: topic_id (PK), chapter, title, objectives
   - syllabus_math:    topic_id (PK), chapter, objectives
-  - questions_physics: id (PK), paper_name, question_number, topic_id (FK→syllabus_physics)
-  - questions_math:    id (PK), paper_name, question_number, topic_id (FK→syllabus_math)
+  - questions_physics: id (PK), paper_name, question_number, topic_id (FK→syllabus_physics), image_path, answer
+  - questions_math:    id (PK), paper_name, question_number, topic_id (FK→syllabus_math), image_path, answer
 """
 import json
 import os
@@ -57,6 +57,7 @@ def create_tables(cursor, subject):
             question_number INT           NOT NULL                   COMMENT '题号',
             topic_id        VARCHAR(50)   NOT NULL                   COMMENT '所属主题编号',
             image_path      VARCHAR(500)                             COMMENT '题目图片路径',
+            answer          VARCHAR(10)   DEFAULT NULL               COMMENT '正确答案（如 A/B/C/D）',
             PRIMARY KEY (id),
             UNIQUE KEY uk_paper_question (paper_name, question_number)
                 COMMENT '同一试卷内题号唯一',
